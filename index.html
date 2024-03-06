@@ -1,20 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AJAX Project</title>
-  <link rel="icon" href="images/favicon.ico">
-  <link rel="stylesheet" href="css/reset.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-  <header>
-  </header>
-  <main>
-  </main>
-  <script src="js/data.js"></script>
-  <script src="js/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AJAX Project</title>
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="row header">
+          <div class="column-half header-text">
+            <h1>Your Climate Future</h1>
+          </div>
+          <div class="column-half entries-text">
+            <h2>Entries</h2>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="container">
+      <div data-view="landing-page" class="">
+        <div class="row landing-page-row">
+          <div class="column-full intro-text">
+            <h1>The year is 2100...</h1>
+          </div>
+          <form class="column-full landing-form" name="landing-form">
+            <label class="inputs label" for="city">
+              Enter a city for a unique climate analysis:
+            </label>
+            <input
+              required="true"
+              class="inputs"
+              type="text"
+              id="city"
+              name="city" />
+            <div class="inputs">
+              <button class="button" type="submit">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>
