@@ -17,10 +17,10 @@ $form.addEventListener('submit', async (event) => {
   viewSwap('loading-page');
   const getRequestArr = await getRequest($formElement.city.value);
   const entriesObject = {
-    title: $formElement.city.value,
+    title: getRequestArr[0],
     year: 2100,
-    resultDescription: getRequestArr[0],
-    imageLink: getRequestArr[1],
+    resultDescription: getRequestArr[1],
+    imageLink: getRequestArr[2],
     entryId: data.nextEntryId,
   };
   data.nextEntryId++;
@@ -88,7 +88,10 @@ async function getCoordinates(userEntry) {
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
-    return result.features[0].geometry.coordinates;
+    console.log(result);
+    const properLocationName = result.features[0].properties.formatted;
+    const coordinatesArr = result.features[0].geometry.coordinates;
+    return [...coordinatesArr, properLocationName];
   } catch (error) {
     console.log('Throw getCoordinates() Error', error);
     throw error;
@@ -144,6 +147,7 @@ async function getClimateDetails(coordinates) {
       meanHigh2100: (meanHigh2100 / results.length).toFixed() + '°F',
       highest2100: (highest2100 / results.length).toFixed() + '°F',
       totalPrcp2100: (totalPrcp2100 / results.length).toFixed() + 'mm',
+      properLocationName: coordinates[2],
     };
     return averagedResultObj;
   } catch (error) {
@@ -154,7 +158,7 @@ async function getClimateDetails(coordinates) {
 async function getRequest(userEntry) {
   const coordsArr = await getCoordinates(userEntry);
   const climateDataObj = await getClimateDetails(coordsArr);
-  const newStr = `highest 2024:
+  const resultDescription = `highest 2024:
     ${climateDataObj.highest2024},
 
      mean high 2024:
@@ -172,7 +176,8 @@ async function getRequest(userEntry) {
      total precipitation 2100:
      ${climateDataObj.totalPrcp2100}`;
   return [
-    newStr,
+    climateDataObj.properLocationName,
+    resultDescription,
     `/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, ` +
       `California, with a focus on its distinctive characteristics. The image ` +
       `should feature the blend of urban and suburban e.webp`,
