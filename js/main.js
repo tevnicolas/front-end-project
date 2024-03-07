@@ -28,7 +28,6 @@ $form.addEventListener('submit', async (event) => {
   $formHook.prepend($newLiTree);
   $form.reset();
   const listOfEntries = document.querySelectorAll('[data-entry-id]');
-  console.log(listOfEntries);
   for (let i = 0; i < listOfEntries.length; i++) {
     const $hidePriorEntries = document.querySelector(
       `div[data-entry-id="${i}"]`,
