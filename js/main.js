@@ -1,31 +1,18 @@
-interface FormElement extends HTMLFormControlsCollection {
-  city: HTMLInputElement;
-}
-
-const $form = document.querySelector('.landing-form') as HTMLFormElement;
-const $formElement = $form.elements as FormElement;
-const $landingPage = document.querySelector(
-  'div[data-view="landing-page"]',
-) as HTMLDivElement;
-const $formPage = document.querySelector(
-  'div[data-view="form-page"]',
-) as HTMLDivElement;
-const $entriesPage = document.querySelector(
-  'div[data-view="entries-page"]',
-) as HTMLDivElement;
-const $loadingPage = document.querySelector(
-  'div[data-view="loading-page"]',
-) as HTMLDivElement;
+'use strict';
+const $form = document.querySelector('.landing-form');
+const $formElement = $form.elements;
+const $landingPage = document.querySelector('div[data-view="landing-page"]');
+const $formPage = document.querySelector('div[data-view="form-page"]');
+const $entriesPage = document.querySelector('div[data-view="entries-page"]');
+const $loadingPage = document.querySelector('div[data-view="loading-page"]');
 const $formHook = document.querySelector('.form-page');
-
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
-
-$form.addEventListener('submit', async (event: Event) => {
+$form.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
   const getRequestArr = await getRequest($formElement.city.value);
@@ -50,8 +37,7 @@ $form.addEventListener('submit', async (event: Event) => {
   viewSwap('form-page');
   $form.reset();
 });
-
-function render(entry: EntriesObject): HTMLDivElement {
+function render(entry) {
   const $divRow = document.createElement('div');
   $divRow.setAttribute('class', 'row');
   $divRow.setAttribute('data-entry-id', String(entry.entryId));
@@ -71,7 +57,6 @@ function render(entry: EntriesObject): HTMLDivElement {
   $cityHeading.textContent = entry.title;
   const $description = document.createElement('p');
   $description.textContent = entry.resultDescription;
-
   $divTextual.appendChild($cityHeading);
   $divTextual.appendChild($description);
   $divColHalf2.appendChild($divTextual);
@@ -79,11 +64,9 @@ function render(entry: EntriesObject): HTMLDivElement {
   $divColHalf.appendChild($divImageContainer);
   $divRow.appendChild($divColHalf);
   $divRow.appendChild($divColHalf2);
-
   return $divRow;
 }
-
-document.addEventListener('DOMContentLoaded', (): void => {
+document.addEventListener('DOMContentLoaded', () => {
   for (const entry of data.entries) {
     const $newLiRowTree = render(entry);
     $formHook.appendChild($newLiRowTree);
@@ -91,8 +74,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   viewSwap(data.view);
   $form.reset();
 });
-
-async function getCoordinates(userEntry: string): Promise<number[]> {
+async function getCoordinates(userEntry) {
   try {
     const locationArr = userEntry.split(' ');
     let location = '';
@@ -110,17 +92,7 @@ async function getCoordinates(userEntry: string): Promise<number[]> {
     throw error;
   }
 }
-
-interface Temps {
-  meanHigh2024: string;
-  highest2024: string;
-  totalPrcp2024: string;
-  meanHigh2100: string;
-  highest2100: string;
-  totalPrcp2100: string;
-}
-
-async function getClimateDetails(coordinates: number[]): Promise<Temps> {
+async function getClimateDetails(coordinates) {
   try {
     const lat = coordinates[1];
     const long = coordinates[0];
@@ -134,7 +106,6 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
         return fetch(`https://lfz-cors.herokuapp.com/?url=${targetUrl}`);
       }),
     );
-
     const results = await Promise.all(
       responses.map(async (response) => {
         if (!response.ok) {
@@ -143,14 +114,12 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
         return response.json();
       }),
     );
-
     let meanHigh2024 = 0;
     let highest2024 = 0;
     let totalPrcp2024 = 0;
     let meanHigh2100 = 0;
     let highest2100 = 0;
     let totalPrcp2100 = 0;
-
     for (let i = 0; i < results.length; i++) {
       meanHigh2024 +=
         (Number(results[i].Climatic_Annual[0][0][0].MeanTmax) * 9) / 5 + 32;
@@ -164,8 +133,7 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
         32;
       totalPrcp2100 += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
-
-    const averagedResultObj: Temps = {
+    const averagedResultObj = {
       meanHigh2024: String(meanHigh2024 / results.length) + '°F',
       highest2024: String(highest2024 / results.length) + '°F',
       totalPrcp2024: String(totalPrcp2024 / results.length) + 'mm',
@@ -173,15 +141,13 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
       highest2100: String(highest2100 / results.length) + '°F',
       totalPrcp2100: String(totalPrcp2100 / results.length) + 'mm',
     };
-
     return averagedResultObj;
   } catch (error) {
     console.log('Throw getClimateDetails() Error', error);
     throw error;
   }
 }
-
-async function getRequest(userEntry: string): Promise<string[]> {
+async function getRequest(userEntry) {
   const coordsArr = await getCoordinates(userEntry);
   const climateDataObj = await getClimateDetails(coordsArr);
   const newStr = `highest 2024:
@@ -206,8 +172,7 @@ async function getRequest(userEntry: string): Promise<string[]> {
     '/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, California, with a focus on its distinctive characteristics. The image should feature the blend of urban and suburban e.webp',
   ];
 }
-
-function viewSwap(view: string): void {
+function viewSwap(view) {
   if (view === 'landing-page') {
     $landingPage.setAttribute('class', '');
     $formPage.setAttribute('class', 'hidden');
