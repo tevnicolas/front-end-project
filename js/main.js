@@ -18,6 +18,7 @@ $form.addEventListener('submit', async (event) => {
   const getRequestArr = await getRequest($formElement.city.value);
   const entriesObject = {
     title: $formElement.city.value,
+    year: 2100,
     resultDescription: getRequestArr[0],
     imageLink: getRequestArr[1],
     entryId: data.nextEntryId,
@@ -82,7 +83,8 @@ async function getCoordinates(userEntry) {
       location += word + '%20';
     }
     const response = await fetch(
-      `https://api.geoapify.com/v1/geocode/search?text=${location}&apiKey=24eee991e6a741b48f4dd298bf8f58a4`,
+      `https://api.geoapify.com/v1/geocode/search?text=` +
+        `${location}&apiKey=24eee991e6a741b48f4dd298bf8f58a4`,
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
@@ -98,7 +100,9 @@ async function getClimateDetails(coordinates) {
     const long = coordinates[0];
     // Encode the target URL with the appropriate route, parameters, and model
     const targetUrl = encodeURIComponent(
-      `http://repicea.dynu.net/biosim/BioSimWeather?lat=${lat}&long=${long}&from=2024&to=2100&model=Climatic_Annual&rcp=8_5&climMod=GCM4&format=json`,
+      `http://repicea.dynu.net/biosim/BioSimWeather?lat=` +
+        `${lat}&long=${long}&from=2024&to=2100&model=Climatic_Annual&rcp=8_5` +
+        `&climMod=GCM4&format=json`,
     );
     // Fetch the data 10 times using a CORS proxy to avoid cross-origin issues
     const responses = await Promise.all(
@@ -134,12 +138,12 @@ async function getClimateDetails(coordinates) {
       totalPrcp2100 += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
     const averagedResultObj = {
-      meanHigh2024: String(meanHigh2024 / results.length) + '°F',
-      highest2024: String(highest2024 / results.length) + '°F',
-      totalPrcp2024: String(totalPrcp2024 / results.length) + 'mm',
-      meanHigh2100: String(meanHigh2100 / results.length) + '°F',
-      highest2100: String(highest2100 / results.length) + '°F',
-      totalPrcp2100: String(totalPrcp2100 / results.length) + 'mm',
+      meanHigh2024: (meanHigh2024 / results.length).toFixed() + '°F',
+      highest2024: (highest2024 / results.length).toFixed() + '°F',
+      totalPrcp2024: (totalPrcp2024 / results.length).toFixed() + 'mm',
+      meanHigh2100: (meanHigh2100 / results.length).toFixed() + '°F',
+      highest2100: (highest2100 / results.length).toFixed() + '°F',
+      totalPrcp2100: (totalPrcp2100 / results.length).toFixed() + 'mm',
     };
     return averagedResultObj;
   } catch (error) {
@@ -169,7 +173,9 @@ async function getRequest(userEntry) {
      ${climateDataObj.totalPrcp2100}`;
   return [
     newStr,
-    '/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, California, with a focus on its distinctive characteristics. The image should feature the blend of urban and suburban e.webp',
+    `/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, ` +
+      `California, with a focus on its distinctive characteristics. The image ` +
+      `should feature the blend of urban and suburban e.webp`,
   ];
 }
 function viewSwap(view) {

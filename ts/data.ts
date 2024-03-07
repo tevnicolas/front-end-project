@@ -1,6 +1,7 @@
 /* exported data */
 interface EntriesObject {
   title: string;
+  year: number;
   resultDescription: string;
   imageLink: string;
   entryId: number;
