@@ -1,21 +1,15 @@
-// interface FormElement extends HTMLFormControlsCollection {
-//   city: HTMLInputElement;
-// }
-
-const $form = document.querySelector('.landing-form') as HTMLFormElement;
-// const $formElement = $form.elements as FormElement;
-
+'use strict';
+const $form = document.querySelector('.landing-form');
+const $formElement = $form.elements;
 if (!$form) throw new Error('$form query failed.');
-
-$form.addEventListener('submit', (event: Event) => {
+$form.addEventListener('submit', (event) => {
   event.preventDefault();
 });
-
-async function getCoordinates(userEntry: string): Promise<number[]> {
+async function getCoordinates(userEntry) {
   try {
     const locationArr = userEntry.split(' ');
     let location = '';
-    for (const word of locationArr) {
+    for (let word of locationArr) {
       location += word + '%20';
     }
     const response = await fetch(
@@ -29,17 +23,7 @@ async function getCoordinates(userEntry: string): Promise<number[]> {
     throw error;
   }
 }
-
-interface Temps {
-  meanHigh2024: string;
-  highest2024: string;
-  totalPrcp2024: string;
-  meanHigh2100: string;
-  highest2100: string;
-  totalPrcp2100: string;
-}
-
-async function getClimateDetails(coordinates: number[]): Promise<Temps> {
+async function getClimateDetails(coordinates) {
   try {
     const lat = coordinates[1];
     const long = coordinates[0];
@@ -53,7 +37,6 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
         return fetch(`https://lfz-cors.herokuapp.com/?url=${targetUrl}`);
       }),
     );
-
     const results = await Promise.all(
       responses.map(async (response) => {
         if (!response.ok) {
@@ -62,14 +45,12 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
         return response.json();
       }),
     );
-
     let meanHigh2024 = 0;
     let highest2024 = 0;
     let totalPrcp2024 = 0;
     let meanHigh2100 = 0;
     let highest2100 = 0;
     let totalPrcp2100 = 0;
-
     for (let i = 0; i < results.length; i++) {
       meanHigh2024 +=
         (Number(results[i].Climatic_Annual[0][0][0].MeanTmax) * 9) / 5 + 32;
@@ -83,8 +64,7 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
         32;
       totalPrcp2100 += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
-
-    const averagedResultObj: Temps = {
+    const averagedResultObj = {
       meanHigh2024: String(meanHigh2024 / results.length) + '°F',
       highest2024: String(highest2024 / results.length) + '°F',
       totalPrcp2024: String(totalPrcp2024 / results.length) + 'mm',
@@ -92,19 +72,16 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
       highest2100: String(highest2100 / results.length) + '°F',
       totalPrcp2100: String(totalPrcp2100 / results.length) + 'mm',
     };
-
     return averagedResultObj;
   } catch (error) {
     console.log('Throw getClimateDetails() Error', error);
     throw error;
   }
 }
-
-async function getRequest(userEntry: string): Promise<void> {
+async function getRequest(userEntry) {
   const coordsArr = await getCoordinates(userEntry);
   console.log(coordsArr);
   const climateDataObj = await getClimateDetails(coordsArr);
   console.log(climateDataObj);
 }
-
 getRequest('Cairo, Egypt');

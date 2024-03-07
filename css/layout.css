@@ -4,7 +4,7 @@
 
 .container {
   max-width: 575px;
-  min-width: 421px;
+  min-width: 375px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
