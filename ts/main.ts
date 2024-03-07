@@ -40,7 +40,9 @@ $form.addEventListener('submit', async (event: Event) => {
   const $newLiTree = render(entriesObject);
   $formHook.prepend($newLiTree);
   $form.reset();
-  for (let i = 0; i < entriesObject.entryId; i++) {
+  const listOfEntries = document.querySelectorAll('[data-entry-id]');
+  console.log(listOfEntries);
+  for (let i = 0; i < listOfEntries.length; i++) {
     const $hidePriorEntries = document.querySelector(
       `div[data-entry-id="${i}"]`,
     );
@@ -61,6 +63,7 @@ function render(entry: EntriesObject): HTMLDivElement {
   const $image = document.createElement('img');
   $image.setAttribute('class', 'image');
   $image.setAttribute('src', entry.imageLink);
+  $image.setAttribute('alt', entry.title);
   const $divColHalf2 = document.createElement('div');
   $divColHalf2.setAttribute('class', 'column-half');
   const $divTextual = document.createElement('div');
