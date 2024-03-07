@@ -1,6 +1,6 @@
 'use strict';
 let data = {
-  view: 'entry-form',
+  view: 'landing-page',
   entries: [],
   editing: null,
   nextEntryId: 1,

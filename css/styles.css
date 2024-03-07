@@ -104,7 +104,6 @@ header {
 
 .image {
   width: 100%;
-  height: 100%;
 }
 
 .image-container {
@@ -133,6 +132,13 @@ header {
   position: absolute;
   top: 80px;
   right: -100px;
+}
+
+.loading {
+  text-align: center;
+  padding-top: 20vh;
+  color: red;
+  font-size: 20px;
 }
 
 @media screen and (max-width: 767px) {

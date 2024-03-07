@@ -2,6 +2,7 @@
 interface EntriesObject {
   title: string;
   resultDescription: string;
+  imageLink: string;
   entryId: number;
 }
 
@@ -13,7 +14,7 @@ interface Data {
 }
 
 let data: Data = {
-  view: 'entry-form',
+  view: 'landing-page',
   entries: [],
   editing: null,
   nextEntryId: 1,

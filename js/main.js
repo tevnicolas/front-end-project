@@ -4,20 +4,73 @@ const $formElement = $form.elements;
 const $landingPage = document.querySelector('div[data-view="landing-page"]');
 const $formPage = document.querySelector('div[data-view="form-page"]');
 const $entriesPage = document.querySelector('div[data-view="entries-page"]');
+const $loadingPage = document.querySelector('div[data-view="loading-page"]');
+const $formHook = document.querySelector('.form-page');
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
+if (!$loadingPage) throw new Error('$loadingPage query failed.');
+if (!$formHook) throw new Error('$formHook query failed.');
 $form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  $landingPage.setAttribute('class', 'hidden');
+  viewSwap('loading-page');
+  const getRequestArr = await getRequest($formElement.city.value);
   const entriesObject = {
     title: $formElement.city.value,
-    resultDescription: await getRequest($formElement.city.value),
+    resultDescription: getRequestArr[0],
+    imageLink: getRequestArr[1],
     entryId: data.nextEntryId,
   };
+  data.nextEntryId++;
+  data.entries.unshift(entriesObject);
+  const $newLiTree = render(entriesObject);
+  $formHook.prepend($newLiTree);
+  $form.reset();
+  for (let i = 0; i < entriesObject.entryId; i++) {
+    const $hidePriorEntries = document.querySelector(
+      `div[data-entry-id="${i}"]`,
+    );
+    $hidePriorEntries?.setAttribute('class', 'row hidden');
+  }
   viewSwap('form-page');
-  console.log(entriesObject);
+  $form.reset();
+});
+function render(entry) {
+  const $divRow = document.createElement('div');
+  $divRow.setAttribute('class', 'row');
+  $divRow.setAttribute('data-entry-id', String(entry.entryId));
+  const $divColHalf = document.createElement('div');
+  $divColHalf.setAttribute('class', 'column-half');
+  const $divImageContainer = document.createElement('div');
+  $divImageContainer.setAttribute('class', 'image-container');
+  const $image = document.createElement('img');
+  $image.setAttribute('class', 'image');
+  $image.setAttribute('src', entry.imageLink);
+  const $divColHalf2 = document.createElement('div');
+  $divColHalf2.setAttribute('class', 'column-half');
+  const $divTextual = document.createElement('div');
+  $divTextual.setAttribute('class', 'textual');
+  const $cityHeading = document.createElement('h1');
+  $cityHeading.textContent = entry.title;
+  const $description = document.createElement('p');
+  $description.textContent = entry.resultDescription;
+  $divTextual.appendChild($cityHeading);
+  $divTextual.appendChild($description);
+  $divColHalf2.appendChild($divTextual);
+  $divImageContainer.appendChild($image);
+  $divColHalf.appendChild($divImageContainer);
+  $divRow.appendChild($divColHalf);
+  $divRow.appendChild($divColHalf2);
+  return $divRow;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  for (const entry of data.entries) {
+    const $newLiRowTree = render(entry);
+    $formHook.appendChild($newLiRowTree);
+  }
+  viewSwap(data.view);
+  $form.reset();
 });
 async function getCoordinates(userEntry) {
   try {
@@ -94,21 +147,31 @@ async function getClimateDetails(coordinates) {
 }
 async function getRequest(userEntry) {
   const coordsArr = await getCoordinates(userEntry);
-  console.log(coordsArr);
   const climateDataObj = await getClimateDetails(coordsArr);
-  return JSON.stringify(climateDataObj);
+  return [
+    JSON.stringify(climateDataObj),
+    '/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, California, with a focus on its distinctive characteristics. The image should feature the blend of urban and suburban e.webp',
+  ];
 }
 function viewSwap(view) {
   if (view === 'landing-page') {
     $landingPage.setAttribute('class', '');
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
+    $loadingPage.setAttribute('class', 'hidden');
   } else if (view === 'form-page') {
     $formPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
+    $loadingPage.setAttribute('class', 'hidden');
   } else if (view === 'entries-page') {
     $entriesPage.setAttribute('class', '');
+    $formPage.setAttribute('class', 'hidden');
+    $landingPage.setAttribute('class', 'hidden');
+    $loadingPage.setAttribute('class', 'hidden');
+  } else if (view === 'loading-page') {
+    $loadingPage.setAttribute('class', '');
+    $entriesPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
     $landingPage.setAttribute('class', 'hidden');
   }
