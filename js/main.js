@@ -148,8 +148,25 @@ async function getClimateDetails(coordinates) {
 async function getRequest(userEntry) {
   const coordsArr = await getCoordinates(userEntry);
   const climateDataObj = await getClimateDetails(coordsArr);
+  const newStr = `highest 2024:
+    ${climateDataObj.highest2024},
+
+     mean high 2024:
+     ${climateDataObj.meanHigh2024},
+
+     total precipitation 2024:
+     ${climateDataObj.totalPrcp2024},
+
+     highest 2100:
+     ${climateDataObj.highest2100},
+
+     mean high 2100:
+     ${climateDataObj.meanHigh2100},
+
+     total precipitation 2100:
+     ${climateDataObj.totalPrcp2100}`;
   return [
-    JSON.stringify(climateDataObj),
+    newStr,
     '/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, California, with a focus on its distinctive characteristics. The image should feature the blend of urban and suburban e.webp',
   ];
 }
