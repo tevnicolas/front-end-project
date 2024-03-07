@@ -1,14 +1,21 @@
-// interface FormElement extends HTMLFormControlsCollection {
-//   city: HTMLInputElement;
-// }
+interface FormElement extends HTMLFormControlsCollection {
+  city: HTMLInputElement;
+}
 
 const $form = document.querySelector('.landing-form') as HTMLFormElement;
-// const $formElement = $form.elements as FormElement;
+const $formElement = $form.elements as FormElement;
 
 if (!$form) throw new Error('$form query failed.');
 
 $form.addEventListener('submit', (event: Event) => {
   event.preventDefault();
+
+  const entriesObject = {
+    title: $formElement.city.value,
+    resultDescription: getRequest($formElement.city.value),
+    entryId: data.nextEntryId,
+  };
+  console.log(entriesObject);
 });
 
 async function getCoordinates(userEntry: string): Promise<number[]> {
@@ -100,11 +107,9 @@ async function getClimateDetails(coordinates: number[]): Promise<Temps> {
   }
 }
 
-async function getRequest(userEntry: string): Promise<void> {
+async function getRequest(userEntry: string): Promise<string> {
   const coordsArr = await getCoordinates(userEntry);
   console.log(coordsArr);
   const climateDataObj = await getClimateDetails(coordsArr);
-  console.log(climateDataObj);
+  return String(climateDataObj);
 }
-
-getRequest('Cairo, Egypt');

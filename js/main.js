@@ -4,12 +4,17 @@ const $formElement = $form.elements;
 if (!$form) throw new Error('$form query failed.');
 $form.addEventListener('submit', (event) => {
   event.preventDefault();
+  const entriesObject = {
+    title: $formElement.city.value,
+    resultDescription: getRequest($formElement.city.value),
+    entryId: data.nextEntryId,
+  };
 });
 async function getCoordinates(userEntry) {
   try {
     const locationArr = userEntry.split(' ');
     let location = '';
-    for (let word of locationArr) {
+    for (const word of locationArr) {
       location += word + '%20';
     }
     const response = await fetch(
@@ -82,6 +87,5 @@ async function getRequest(userEntry) {
   const coordsArr = await getCoordinates(userEntry);
   console.log(coordsArr);
   const climateDataObj = await getClimateDetails(coordsArr);
-  console.log(climateDataObj);
+  return String(climateDataObj);
 }
-getRequest('Cairo, Egypt');
