@@ -4,17 +4,31 @@ interface FormElement extends HTMLFormControlsCollection {
 
 const $form = document.querySelector('.landing-form') as HTMLFormElement;
 const $formElement = $form.elements as FormElement;
+const $landingPage = document.querySelector(
+  'div[data-view="landing-page"]',
+) as HTMLDivElement;
+const $formPage = document.querySelector(
+  'div[data-view="form-page"]',
+) as HTMLDivElement;
+const $entriesPage = document.querySelector(
+  'div[data-view="entries-page"]',
+) as HTMLDivElement;
 
 if (!$form) throw new Error('$form query failed.');
+if (!$landingPage) throw new Error('$landingPage query failed.');
+if (!$formPage) throw new Error('$formPage query failed.');
+if (!$entriesPage) throw new Error('$entriesPage query failed.');
 
-$form.addEventListener('submit', (event: Event) => {
+$form.addEventListener('submit', async (event: Event) => {
   event.preventDefault();
+  $landingPage.setAttribute('class', 'hidden');
 
   const entriesObject = {
     title: $formElement.city.value,
-    resultDescription: getRequest($formElement.city.value),
+    resultDescription: await getRequest($formElement.city.value),
     entryId: data.nextEntryId,
   };
+  viewSwap('form-page');
   console.log(entriesObject);
 });
 
@@ -111,5 +125,21 @@ async function getRequest(userEntry: string): Promise<string> {
   const coordsArr = await getCoordinates(userEntry);
   console.log(coordsArr);
   const climateDataObj = await getClimateDetails(coordsArr);
-  return String(climateDataObj);
+  return JSON.stringify(climateDataObj);
+}
+
+function viewSwap(view: string): void {
+  if (view === 'landing-page') {
+    $landingPage.setAttribute('class', '');
+    $formPage.setAttribute('class', 'hidden');
+    $entriesPage.setAttribute('class', 'hidden');
+  } else if (view === 'form-page') {
+    $formPage.setAttribute('class', '');
+    $landingPage.setAttribute('class', 'hidden');
+    $entriesPage.setAttribute('class', 'hidden');
+  } else if (view === 'entries-page') {
+    $entriesPage.setAttribute('class', '');
+    $formPage.setAttribute('class', 'hidden');
+    $landingPage.setAttribute('class', 'hidden');
+  }
 }
