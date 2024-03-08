@@ -46,7 +46,10 @@ header {
 }
 
 .entries-text {
-  min-width: 100px;
+  display: inline-block;
+  width: 100px;
+  color: white;
+  text-decoration-line: none;
 }
 
 .intro-text {
@@ -89,7 +92,8 @@ header {
   padding: 5px;
 }
 
-.form-page {
+.form-page,
+.entries-page {
   position: relative;
   margin-right: 100px;
   margin-left: 30px;
@@ -141,6 +145,15 @@ header {
   padding-top: 20vh;
   color: red;
   font-size: 20px;
+}
+
+.short-paragraph {
+  /* stylelint-disable-next-line value-no-vendor-prefix */
+  display: -webkit-box;
+  /* stylelint-disable-next-line value-no-vendor-prefix */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* Limits the text to 3 lines */
+  overflow: hidden;
 }
 
 @media screen and (max-width: 767px) {

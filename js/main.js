@@ -6,12 +6,16 @@ const $formPage = document.querySelector('div[data-view="form-page"]');
 const $entriesPage = document.querySelector('div[data-view="entries-page"]');
 const $loadingPage = document.querySelector('div[data-view="loading-page"]');
 const $formHook = document.querySelector('.form-page');
+const $entriesHook = document.querySelector('.entries-page');
+const $entriesText = document.querySelector('.entries-text');
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
+if (!$entriesHook) throw new Error('$entriesHook query failed.');
+if (!$entriesText) throw new Error('$entriesText query failed.');
 $form.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
@@ -27,18 +31,23 @@ $form.addEventListener('submit', async (event) => {
   data.entries.unshift(entriesObject);
   const $newLiTree = render(entriesObject);
   $formHook.prepend($newLiTree);
-  $form.reset();
-  const listOfEntries = document.querySelectorAll('[data-entry-id]');
-  for (let i = 0; i < listOfEntries.length; i++) {
-    const $hidePriorEntries = document.querySelector(
-      `div[data-entry-id="${i}"]`,
-    );
-    $hidePriorEntries?.setAttribute('class', 'row hidden');
-  }
+  // const listOfEntries = document.querySelectorAll('[data-entry-id]');
+  // for (let i = 0; i < listOfEntries.length; i++) {
+  //   const $hidePriorEntries = document.querySelector(
+  //     `div[data-entry-id="${i}"]`,
+  //   );
+  //   $hidePriorEntries?.setAttribute('class', 'row hidden');
+  // }
+  priorEntriesHiddenShown('hidden');
   viewSwap('form-page');
   $form.reset();
 });
-function render(entry) {
+$entriesText.addEventListener('click', (event) => {
+  event.preventDefault();
+  viewSwap('entries-page');
+  priorEntriesHiddenShown('shown');
+});
+function render(entry, type = 'row') {
   const $divRow = document.createElement('div');
   $divRow.setAttribute('class', 'row');
   $divRow.setAttribute('data-entry-id', String(entry.entryId));
@@ -67,10 +76,28 @@ function render(entry) {
   $divRow.appendChild($divColHalf2);
   return $divRow;
 }
+function priorEntriesHiddenShown(option) {
+  let classOption = '';
+  if (option === 'hidden') {
+    classOption = 'row hidden';
+  } else if (option === 'shown') {
+    classOption = 'row';
+  }
+  const listOfEntries = document.querySelectorAll('[data-entry-id]');
+  for (let i = 0; i < listOfEntries.length; i++) {
+    console.log(i); //the issue is that the amount of data entries are being doubled with two dom trees created, thus all are being hidden by this logic. i is at like ~90.
+    const $hidePriorEntries = document.querySelector(
+      `div[data-entry-id="${i}"]`,
+    );
+    $hidePriorEntries?.setAttribute('class', classOption);
+  }
+}
 document.addEventListener('DOMContentLoaded', () => {
   for (const entry of data.entries) {
-    const $newLiRowTree = render(entry);
-    $formHook.appendChild($newLiRowTree);
+    const $newRowTreeFormStyle = render(entry);
+    const $newRowTreeEntriesStyle = $newRowTreeFormStyle.cloneNode(true);
+    $formHook.appendChild($newRowTreeFormStyle);
+    $entriesHook.appendChild($newRowTreeEntriesStyle);
   }
   viewSwap(data.view);
   $form.reset();
@@ -174,7 +201,18 @@ async function getRequest(userEntry) {
      ${climateDataObj.meanHigh2100},
 
      total precipitation 2100:
-     ${climateDataObj.totalPrcp2100}`;
+     ${climateDataObj.totalPrcp2100}
+     Irvine, California, is taking proactive measures to address the challenges posed by climate change, as evidenced by the City Council's unanimous adoption of the Irvine ACHIEVES climate resolution. This resolution sets ambitious climate goals for the city and includes input from key stakeholders and the community. Furthermore, Irvine is developing a comprehensive Climate Action and Adaptation Plan (CAAP) with the assistance of Ascent Environmental, Inc., highlighting the city's commitment to sustainability and climate resilience​​.
+
+On a broader scale, the high-end projections for global sea-level rise by 2100 could be up to 1.3-1.6 meters in the case of strong warming, according to the World Climate Research Programme. This global perspective underscores the importance of local actions like those being taken in Irvine, as coastal areas and communities worldwide will need to adapt to significant changes in sea levels and other climate-related impacts​​.
+
+Habitability Rating for 2100: A-
+
+Global Context for A+: The most resilient locations globally will likely be those with comprehensive climate adaptation plans, robust infrastructure, and effective policy implementation to mitigate climate change impacts. Irvine's proactive stance and strategic planning place it among the more prepared cities, though the ultimate habitability rating is contingent upon ongoing efforts and the broader global response to climate change.
+
+Global Context for F-: The most severely impacted regions will be those that experience extreme weather events, significant sea-level rise, and lack the infrastructure or policies to adapt effectively. Irvine's initiatives to combat and adapt to climate change, including its ambitious climate resolution and action plans, differentiate it from the potential F- scenarios faced by less prepared regions.
+
+Overall Assessment for Irvine: Irvine's A- rating reflects its proactive and ambitious approach to climate change mitigation and adaptation. The city's efforts to engage with stakeholders, set clear climate targets, and develop comprehensive action plans demonstrate a strong commitment to sustainability and resilience. As climate change continues to pose global challenges, Irvine's strategies serve as an important model for other cities aiming to enhance their habitability in the face of environmental changes.`;
   return [
     climateDataObj.properLocationName,
     resultDescription,

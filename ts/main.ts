@@ -17,6 +17,8 @@ const $loadingPage = document.querySelector(
   'div[data-view="loading-page"]',
 ) as HTMLDivElement;
 const $formHook = document.querySelector('.form-page');
+const $entriesHook = document.querySelector('.entries-page');
+const $entriesText = document.querySelector('.entries-text');
 
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
@@ -24,6 +26,8 @@ if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
+if (!$entriesHook) throw new Error('$entriesHook query failed.');
+if (!$entriesText) throw new Error('$entriesText query failed.');
 
 $form.addEventListener('submit', async (event: Event) => {
   event.preventDefault();
@@ -40,16 +44,22 @@ $form.addEventListener('submit', async (event: Event) => {
   data.entries.unshift(entriesObject);
   const $newLiTree = render(entriesObject);
   $formHook.prepend($newLiTree);
-  $form.reset();
-  const listOfEntries = document.querySelectorAll('[data-entry-id]');
-  for (let i = 0; i < listOfEntries.length; i++) {
-    const $hidePriorEntries = document.querySelector(
-      `div[data-entry-id="${i}"]`,
-    );
-    $hidePriorEntries?.setAttribute('class', 'row hidden');
-  }
+  // const listOfEntries = document.querySelectorAll('[data-entry-id]');
+  // for (let i = 0; i < listOfEntries.length; i++) {
+  //   const $hidePriorEntries = document.querySelector(
+  //     `div[data-entry-id="${i}"]`,
+  //   );
+  //   $hidePriorEntries?.setAttribute('class', 'row hidden');
+  // }
+  priorEntriesHiddenShown('hidden');
   viewSwap('form-page');
   $form.reset();
+});
+
+$entriesText.addEventListener('click', (event: Event) => {
+  event.preventDefault();
+  viewSwap('entries-page');
+  priorEntriesHiddenShown('shown');
 });
 
 function render(entry: EntriesObject): HTMLDivElement {
@@ -84,10 +94,29 @@ function render(entry: EntriesObject): HTMLDivElement {
   return $divRow;
 }
 
+function priorEntriesHiddenShown(option: string): void {
+  let classOption = '';
+  if (option === 'hidden') {
+    classOption = 'row hidden';
+  } else if (option === 'shown') {
+    classOption = 'row';
+  }
+  const listOfEntries = document.querySelectorAll('[data-entry-id]');
+  for (let i = 0; i < listOfEntries.length; i++) {
+    console.log(i); // the issue is that the amount of data entries are being doubled with two dom trees created, thus all are being hidden by this logic. i is at like ~90.
+    const $hidePriorEntries = document.querySelector(
+      `div[data-entry-id="${i}"]`,
+    );
+    $hidePriorEntries?.setAttribute('class', classOption);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', (): void => {
   for (const entry of data.entries) {
-    const $newLiRowTree = render(entry);
-    $formHook.appendChild($newLiRowTree);
+    const $newRowTreeFormStyle = render(entry);
+    const $newRowTreeEntriesStyle = $newRowTreeFormStyle.cloneNode(true);
+    $formHook.appendChild($newRowTreeFormStyle);
+    $entriesHook.appendChild($newRowTreeEntriesStyle);
   }
   viewSwap(data.view);
   $form.reset();
