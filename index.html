@@ -15,12 +15,16 @@
   <body>
     <header>
       <div class="container">
-        <div class="row header">
+        <div id="header" class="row header">
           <div class="column-half header-text">
-            <h1>Your Climate Future</h1>
+            <a class="header-anchors" href="">
+              <h1 id="header-text">Your Climate Future</h1>
+            </a>
           </div>
           <div class="column-half">
-            <a class="entries-text" href=""><h2>Entries</h2></a>
+            <a class="header-anchors" href="">
+              <h2 id="entries-text">Entries</h2>
+            </a>
           </div>
         </div>
       </div>
@@ -55,12 +59,14 @@
       <div data-view="form-page" class="hidden">
         <div class="form-page">
           <button class="button buttonpos1">New Entry</button>
-          <button class="button buttonpos2">Change City</button>
+          <button class="button buttonpos2">Edit City/Year</button>
           <button class="button buttonpos3">Delete Entry</button>
         </div>
       </div>
       <div data-view="entries-page" class="hidden">
-        <div class="entries-page"></div>
+        <div class="entries-page">
+          <button class="button buttonpos1">New Entry</button>
+        </div>
       </div>
     </main>
     <script src="js/data.js"></script>

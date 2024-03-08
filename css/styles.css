@@ -45,8 +45,7 @@ header {
   min-width: 320px;
 }
 
-.entries-text {
-  display: inline-block;
+.header-anchors {
   width: 100px;
   color: white;
   text-decoration-line: none;
@@ -93,7 +92,7 @@ header {
 }
 
 .form-page,
-.entries-page {
+.short-row {
   position: relative;
   margin-right: 100px;
   margin-left: 30px;
@@ -104,6 +103,10 @@ header {
     25px 0 20px -20px rgba(0, 0, 0, 0.3),
     0 25px 20px -20px rgba(0, 0, 0, 0.3),
     -25px 0 20px -20px rgba(0, 0, 0, 0.3);
+}
+
+.entries-page {
+  position: relative;
 }
 
 .image {
@@ -122,20 +125,25 @@ header {
 }
 
 .buttonpos1 {
-  width: 85px;
   position: absolute;
+  width: 86px;
+  font-size: 12px;
   top: 0;
   right: -100px;
 }
 
 .buttonpos2 {
   position: absolute;
+  width: 86px;
+  font-size: 12px;
   top: 40px;
   right: -100px;
 }
 
 .buttonpos3 {
   position: absolute;
+  width: 86px;
+  font-size: 12px;
   top: 80px;
   right: -100px;
 }
@@ -152,7 +160,7 @@ header {
   display: -webkit-box;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3; /* Limits the text to 3 lines */
+  -webkit-line-clamp: 8; /* Limits the text to 3 lines */
   overflow: hidden;
 }
 

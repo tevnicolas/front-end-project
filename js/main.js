@@ -7,7 +7,15 @@ const $entriesPage = document.querySelector('div[data-view="entries-page"]');
 const $loadingPage = document.querySelector('div[data-view="loading-page"]');
 const $formHook = document.querySelector('.form-page');
 const $entriesHook = document.querySelector('.entries-page');
-const $entriesText = document.querySelector('.entries-text');
+const $header = document.querySelector('#header');
+const $headerText = document.querySelector('#header-text');
+const $entriesText = document.querySelector('#entries-text');
+const $newEntryButtonFormPage = document.querySelector(
+  '.form-page .buttonpos1',
+);
+const $newEntryButtonEntriesPage = document.querySelector(
+  '.entries-page .buttonpos1',
+);
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
@@ -15,7 +23,13 @@ if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
 if (!$entriesHook) throw new Error('$entriesHook query failed.');
+if (!$header) throw new Error('$header query failed.');
+if (!$headerText) throw new Error('$headerText query failed.');
 if (!$entriesText) throw new Error('$entriesText query failed.');
+if (!$newEntryButtonFormPage)
+  throw new Error('$newEntryButtonFormPage query failed.');
+if (!$newEntryButtonEntriesPage)
+  throw new Error('$newEntryButtonEntriesPage query failed.');
 $form.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
@@ -37,10 +51,18 @@ $form.addEventListener('submit', async (event) => {
   viewSwap('form-page');
   $form.reset();
 });
-$entriesText.addEventListener('click', (event) => {
+$header.addEventListener('click', (event) => {
   event.preventDefault();
-  viewSwap('entries-page');
-  priorEntriesHiddenShown('shown');
+  const $eventTarget = event.target;
+  switch ($eventTarget) {
+    case $headerText:
+      viewSwap('landing-page');
+      break;
+    case $entriesText:
+      viewSwap('entries-page');
+      priorEntriesHiddenShown('shown');
+      break;
+  }
 });
 function render(entry, option) {
   const rowType = option === 'short' ? 'short-row' : 'row';
@@ -112,7 +134,6 @@ async function getCoordinates(userEntry) {
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
-    console.log(result);
     const properLocationName = result.features[0].properties.formatted;
     const coordinatesArr = result.features[0].geometry.coordinates;
     return [...coordinatesArr, properLocationName];

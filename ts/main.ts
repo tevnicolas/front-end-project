@@ -18,7 +18,15 @@ const $loadingPage = document.querySelector(
 ) as HTMLDivElement;
 const $formHook = document.querySelector('.form-page') as HTMLDivElement;
 const $entriesHook = document.querySelector('.entries-page');
-const $entriesText = document.querySelector('.entries-text');
+const $header = document.querySelector('#header');
+const $headerText = document.querySelector('#header-text');
+const $entriesText = document.querySelector('#entries-text');
+const $newEntryButtonFormPage = document.querySelector(
+  '.form-page .buttonpos1',
+);
+const $newEntryButtonEntriesPage = document.querySelector(
+  '.entries-page .buttonpos1',
+);
 
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
@@ -27,7 +35,13 @@ if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
 if (!$entriesHook) throw new Error('$entriesHook query failed.');
+if (!$header) throw new Error('$header query failed.');
+if (!$headerText) throw new Error('$headerText query failed.');
 if (!$entriesText) throw new Error('$entriesText query failed.');
+if (!$newEntryButtonFormPage)
+  throw new Error('$newEntryButtonFormPage query failed.');
+if (!$newEntryButtonEntriesPage)
+  throw new Error('$newEntryButtonEntriesPage query failed.');
 
 $form.addEventListener('submit', async (event: Event) => {
   event.preventDefault();
@@ -52,10 +66,18 @@ $form.addEventListener('submit', async (event: Event) => {
   $form.reset();
 });
 
-$entriesText.addEventListener('click', (event: Event) => {
+$header.addEventListener('click', (event: Event): void => {
   event.preventDefault();
-  viewSwap('entries-page');
-  priorEntriesHiddenShown('shown');
+  const $eventTarget = event.target as HTMLElement;
+  switch ($eventTarget) {
+    case $headerText:
+      viewSwap('landing-page');
+      break;
+    case $entriesText:
+      viewSwap('entries-page');
+      priorEntriesHiddenShown('shown');
+      break;
+  }
 });
 
 function render(entry: EntriesObject, option: string): HTMLDivElement {
@@ -134,7 +156,6 @@ async function getCoordinates(userEntry: string): Promise<(number | string)[]> {
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
-    console.log(result);
     const properLocationName: string = result.features[0].properties.formatted;
     const coordinatesArr: number[] = result.features[0].geometry.coordinates;
     return [...coordinatesArr, properLocationName];
