@@ -17,7 +17,7 @@
 .short-row {
   display: flex;
   flex-wrap: wrap;
-  overflow: hidden;
+  margin-bottom: 30px;
   text-overflow: ellipse;
   height: 400px;
 }

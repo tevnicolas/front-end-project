@@ -64,6 +64,15 @@ $header.addEventListener('click', (event) => {
       break;
   }
 });
+$formHook.addEventListener('click', (event) => {
+  event.preventDefault();
+  const $eventTarget = event.target;
+  switch ($eventTarget) {
+    case $newEntryButtonFormPage:
+      viewSwap('landing-page');
+      break;
+  }
+});
 function render(entry, option) {
   const rowType = option === 'short' ? 'short-row' : 'row';
   const pType = option === 'short' ? 'short-paragraph' : '';

@@ -80,6 +80,16 @@ $header.addEventListener('click', (event: Event): void => {
   }
 });
 
+$formHook.addEventListener('click', (event: Event): void => {
+  event.preventDefault();
+  const $eventTarget = event.target as HTMLElement;
+  switch ($eventTarget) {
+    case $newEntryButtonFormPage:
+      viewSwap('landing-page');
+      break;
+  }
+});
+
 function render(entry: EntriesObject, option: string): HTMLDivElement {
   const rowType = option === 'short' ? 'short-row' : 'row';
   const pType = option === 'short' ? 'short-paragraph' : '';
