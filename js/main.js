@@ -16,6 +16,7 @@ const $newEntryButtonFormPage = document.querySelector(
 const $newEntryButtonEntriesPage = document.querySelector(
   '.entries-page .buttonpos1',
 );
+const $noEntries = document.querySelector('.no-entries');
 if (!$form) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
@@ -30,6 +31,7 @@ if (!$newEntryButtonFormPage)
   throw new Error('$newEntryButtonFormPage query failed.');
 if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
+if (!$noEntries) throw new Error('$noEntries query failed.');
 $form.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
@@ -73,9 +75,30 @@ $formHook.addEventListener('click', (event) => {
       break;
   }
 });
+$entriesHook.addEventListener('click', (event) => {
+  event.preventDefault();
+  const $eventTarget = event.target;
+  switch ($eventTarget) {
+    case $newEntryButtonEntriesPage:
+      viewSwap('landing-page');
+      break;
+  }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  for (const entry of data.entries) {
+    const $newRowTreeFormStyle = render(entry, 'long');
+    const $newRowTreeEntriesStyle = render(entry, 'short');
+    $formHook.appendChild($newRowTreeFormStyle);
+    $entriesHook.appendChild($newRowTreeEntriesStyle);
+  }
+  toggleNoEntries(); //not sure if I need this here
+  viewSwap(data.view); // not certain why this is here yet
+  $form.reset(); // also not 100% if this needs to be here
+});
 function render(entry, option) {
   const rowType = option === 'short' ? 'short-row' : 'row';
   const pType = option === 'short' ? 'short-paragraph' : '';
+  const pointer = option === 'short' ? 'pointer' : '';
   const $divRow = document.createElement('div');
   $divRow.setAttribute('class', rowType);
   $divRow.setAttribute('data-entry-id', String(entry.entryId));
@@ -92,6 +115,7 @@ function render(entry, option) {
   const $divTextual = document.createElement('div');
   $divTextual.setAttribute('class', 'textual');
   const $cityHeading = document.createElement('h1');
+  $cityHeading.setAttribute('class', pointer);
   $cityHeading.textContent = entry.title;
   const $description = document.createElement('p');
   $description.setAttribute('class', pType);
@@ -112,24 +136,23 @@ function priorEntriesHiddenShown(option) {
   } else if (option === 'shown') {
     classOption = 'row';
   }
-  const listOfEntries = $formHook.querySelectorAll('[data-entry-id]');
-  for (let i = 0; i < listOfEntries.length; i++) {
+  const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
+  for (let i = 0; i < $listOfFormEntries.length; i++) {
     const $hidePriorEntries = document.querySelector(
       `div[data-entry-id="${i}"]`,
     );
     $hidePriorEntries?.setAttribute('class', classOption);
   }
 }
-document.addEventListener('DOMContentLoaded', () => {
-  for (const entry of data.entries) {
-    const $newRowTreeFormStyle = render(entry, 'long');
-    const $newRowTreeEntriesStyle = render(entry, 'short');
-    $formHook.appendChild($newRowTreeFormStyle);
-    $entriesHook.appendChild($newRowTreeEntriesStyle);
+function toggleNoEntries() {
+  const $listOfEntriesEntries =
+    $entriesHook.querySelectorAll('[data-entry-id]');
+  if ($listOfEntriesEntries.length === 0) {
+    $noEntries.setAttribute('class', 'column-full no-entries');
+  } else {
+    $noEntries.setAttribute('class', 'column-full no-entries hidden');
   }
-  viewSwap(data.view);
-  $form.reset();
-});
+}
 async function getCoordinates(userEntry) {
   try {
     const locationArr = userEntry.split(' ');
@@ -243,6 +266,7 @@ function viewSwap(view) {
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    $form.reset();
   } else if (view === 'form-page') {
     $formPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
@@ -253,6 +277,7 @@ function viewSwap(view) {
     $formPage.setAttribute('class', 'hidden');
     $landingPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    toggleNoEntries();
   } else if (view === 'loading-page') {
     $loadingPage.setAttribute('class', '');
     $entriesPage.setAttribute('class', 'hidden');

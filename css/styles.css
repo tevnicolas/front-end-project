@@ -1,5 +1,6 @@
 @font-face {
   font-family: 'Roboto Mono';
+  /* stylelint-disable-next-line */
   src: url('../Fonts/Roboto_Mono/static/RobotoMono-Regular.ttf')
     format('truetype');
   font-weight: 400;
@@ -179,6 +180,14 @@ header {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 11; /* Limits the text to 3 lines */
   overflow: hidden;
+}
+
+.no-entries {
+  text-align: center;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 @media screen and (max-width: 767px) {
