@@ -141,17 +141,14 @@ function hideOtherEntriesExcept(option) {
   } else {
     entryNum = option;
   }
-  console.log(entryNum);
   for (let i = 0; i <= $listOfFormEntries.length; i++) {
     const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
     if (i !== entryNum) {
       $hideOtherEntries?.setAttribute('class', 'row hidden');
-      console.log(i);
     } else {
       $hideOtherEntries?.setAttribute('class', 'row');
-      console.log('hello');
     }
   }
 }
