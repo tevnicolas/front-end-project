@@ -49,7 +49,7 @@ $form.addEventListener('submit', async (event) => {
   $formHook.prepend($newRowTreeFormStyle);
   const $newRowTreeEntriesStyle = render(entriesObject, 'short');
   $entriesHook.prepend($newRowTreeEntriesStyle);
-  priorEntriesHiddenShown('hidden');
+  hideOtherEntriesExcept('last');
   viewSwap('form-page');
   $form.reset();
 });
@@ -62,7 +62,6 @@ $header.addEventListener('click', (event) => {
       break;
     case $entriesText:
       viewSwap('entries-page');
-      priorEntriesHiddenShown('shown');
       break;
   }
 });
@@ -78,10 +77,15 @@ $formHook.addEventListener('click', (event) => {
 $entriesHook.addEventListener('click', (event) => {
   event.preventDefault();
   const $eventTarget = event.target;
-  switch ($eventTarget) {
-    case $newEntryButtonEntriesPage:
-      viewSwap('landing-page');
-      break;
+  if ($eventTarget === $newEntryButtonEntriesPage) {
+    viewSwap('landing-page');
+  } else if ($eventTarget.tagName === 'H1') {
+    const $shortRowTarget = $eventTarget.closest('[data-entry-id]');
+    const dataEntryIDTarget = Number(
+      $shortRowTarget.getAttribute('data-entry-id'),
+    );
+    hideOtherEntriesExcept(dataEntryIDTarget);
+    viewSwap('form-page');
   }
 });
 document.addEventListener('DOMContentLoaded', () => {
@@ -91,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $formHook.appendChild($newRowTreeFormStyle);
     $entriesHook.appendChild($newRowTreeEntriesStyle);
   }
-  toggleNoEntries(); //not sure if I need this here
+  toggleNoEntries(); // not sure if I need this here
   viewSwap(data.view); // not certain why this is here yet
   $form.reset(); // also not 100% if this needs to be here
 });
@@ -129,19 +133,26 @@ function render(entry, option) {
   $divRow.appendChild($divColHalf2);
   return $divRow;
 }
-function priorEntriesHiddenShown(option) {
-  let classOption = '';
-  if (option === 'hidden') {
-    classOption = 'row hidden';
-  } else if (option === 'shown') {
-    classOption = 'row';
-  }
+function hideOtherEntriesExcept(option) {
+  let entryNum = 0;
   const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
-  for (let i = 0; i < $listOfFormEntries.length; i++) {
-    const $hidePriorEntries = document.querySelector(
+  if (option === 'last') {
+    entryNum = $listOfFormEntries.length;
+  } else {
+    entryNum = option;
+  }
+  console.log(entryNum);
+  for (let i = 0; i <= $listOfFormEntries.length; i++) {
+    const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
-    $hidePriorEntries?.setAttribute('class', classOption);
+    if (i !== entryNum) {
+      $hideOtherEntries?.setAttribute('class', 'row hidden');
+      console.log(i);
+    } else {
+      $hideOtherEntries?.setAttribute('class', 'row');
+      console.log('hello');
+    }
   }
 }
 function toggleNoEntries() {
