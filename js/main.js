@@ -183,7 +183,7 @@ async function getCoordinates(locationEntry) {
     throw error;
   }
 }
-async function getClimateDetails(coordsAndProperName) {
+async function getClimateDetails(coordsAndProperName, futureYear) {
   try {
     const lat = coordsAndProperName[1];
     const long = coordsAndProperName[0];
@@ -227,18 +227,19 @@ async function getClimateDetails(coordsAndProperName) {
       totalPrcpFuture += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
     const averagedResultObj = {
+      formattedLocationName: coordsAndProperName[2],
       meanOfHighTempsCurrentYear:
         (meanHighCurr / results.length).toFixed() + '°F',
       highestTempOfCurrentYear: (highestCurr / results.length).toFixed() + '°F',
       totalPrecipitationCurrentYear:
         (totalPrcpCurr / results.length).toFixed() + 'mm',
+      futureYear: futureYear,
       meanOfHighTempsFutureYear:
         (meanHighFuture / results.length).toFixed() + '°F',
       highestTempOfFutureYear:
         (highestFuture / results.length).toFixed() + '°F',
       totalPrecipitationFutureYear:
         (totalPrcpFuture / results.length).toFixed() + 'mm',
-      properLocationName: coordsAndProperName[2],
     };
     return averagedResultObj;
   } catch (error) {
@@ -247,22 +248,12 @@ async function getClimateDetails(coordsAndProperName) {
   }
 }
 async function getRequest(locationEntry, yearEntry = '2100') {
-  console.log(yearEntry); //update the getClimateDetails() function to take a year parameter and have that reflect in the call. Then pass it through or add it to the climate Obj or something.
   const coordsArr = await getCoordinates(locationEntry);
-  const climateDataObj = await getClimateDetails(coordsArr);
-  const printClimateDataObj = JSON.stringify(
-    climateDataObj,
-    (key, value) => {
-      if (key === 'properLocationName') {
-        return undefined;
-      }
-      return value;
-    },
-    2,
-  );
+  const climateDataObj = await getClimateDetails(coordsArr, yearEntry);
+  const dataForGPT = JSON.stringify(climateDataObj, null, 2);
   return [
-    climateDataObj.properLocationName,
-    printClimateDataObj,
+    climateDataObj.formattedLocationName,
+    dataForGPT,
     `/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, ` +
       `California, with a focus on its distinctive characteristics. The image ` +
       `should feature the blend of urban and suburban e.webp`,

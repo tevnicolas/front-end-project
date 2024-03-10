@@ -215,17 +215,19 @@ async function getCoordinates(
 }
 
 interface Temps {
+  formattedLocationName: string;
   meanOfHighTempsCurrentYear: string;
   highestTempOfCurrentYear: string;
   totalPrecipitationCurrentYear: string;
+  futureYear: string;
   meanOfHighTempsFutureYear: string;
   highestTempOfFutureYear: string;
   totalPrecipitationFutureYear: string;
-  properLocationName: string;
 }
 
 async function getClimateDetails(
   coordsAndProperName: (number | string)[],
+  futureYear: string,
 ): Promise<Temps> {
   try {
     const lat = coordsAndProperName[1];
@@ -274,18 +276,19 @@ async function getClimateDetails(
     }
 
     const averagedResultObj: Temps = {
+      formattedLocationName: coordsAndProperName[2] as string,
       meanOfHighTempsCurrentYear:
         (meanHighCurr / results.length).toFixed() + '°F',
       highestTempOfCurrentYear: (highestCurr / results.length).toFixed() + '°F',
       totalPrecipitationCurrentYear:
         (totalPrcpCurr / results.length).toFixed() + 'mm',
+      futureYear,
       meanOfHighTempsFutureYear:
         (meanHighFuture / results.length).toFixed() + '°F',
       highestTempOfFutureYear:
         (highestFuture / results.length).toFixed() + '°F',
       totalPrecipitationFutureYear:
         (totalPrcpFuture / results.length).toFixed() + 'mm',
-      properLocationName: coordsAndProperName[2] as string,
     };
 
     return averagedResultObj;
@@ -299,22 +302,12 @@ async function getRequest(
   locationEntry: string,
   yearEntry = '2100',
 ): Promise<string[]> {
-  console.log(yearEntry); // update the getClimateDetails() function to take a year parameter and have that reflect in the call. Then pass it through or add it to the climate Obj or something.
   const coordsArr = await getCoordinates(locationEntry);
-  const climateDataObj = await getClimateDetails(coordsArr);
-  const printClimateDataObj = JSON.stringify(
-    climateDataObj,
-    (key, value) => {
-      if (key === 'properLocationName') {
-        return undefined;
-      }
-      return value;
-    },
-    2,
-  );
+  const climateDataObj = await getClimateDetails(coordsArr, yearEntry);
+  const dataForGPT = JSON.stringify(climateDataObj, null, 2);
   return [
-    climateDataObj.properLocationName,
-    printClimateDataObj,
+    climateDataObj.formattedLocationName,
+    dataForGPT,
     `/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, ` +
       `California, with a focus on its distinctive characteristics. The image ` +
       `should feature the blend of urban and suburban e.webp`,
