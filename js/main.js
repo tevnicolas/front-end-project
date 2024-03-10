@@ -1,6 +1,7 @@
 'use strict';
+const currentDate = new Date().getFullYear();
 const $form = document.querySelector('.landing-form');
-const $formElement = $form.elements;
+const $landingFormElements = $form.elements;
 const $landingPage = document.querySelector('div[data-view="landing-page"]');
 const $formPage = document.querySelector('div[data-view="form-page"]');
 const $entriesPage = document.querySelector('div[data-view="entries-page"]');
@@ -35,10 +36,10 @@ if (!$noEntries) throw new Error('$noEntries query failed.');
 $form.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
-  const getRequestArr = await getRequest($formElement.city.value);
+  const getRequestArr = await getRequest($landingFormElements.city.value);
   const entriesObject = {
     title: getRequestArr[0],
-    year: 2100,
+    year: '2100',
     resultDescription: getRequestArr[1],
     imageLink: getRequestArr[2],
     entryId: data.nextEntryId,
@@ -161,9 +162,9 @@ function toggleNoEntries() {
     $noEntries.setAttribute('class', 'column-full no-entries hidden');
   }
 }
-async function getCoordinates(userEntry) {
+async function getCoordinates(locationEntry) {
   try {
-    const locationArr = userEntry.split(' ');
+    const locationArr = locationEntry.split(' ');
     let location = '';
     for (const word of locationArr) {
       location += word + '%20';
@@ -182,15 +183,15 @@ async function getCoordinates(userEntry) {
     throw error;
   }
 }
-async function getClimateDetails(coordinates) {
+async function getClimateDetails(coordsAndProperName) {
   try {
-    const lat = coordinates[1];
-    const long = coordinates[0];
+    const lat = coordsAndProperName[1];
+    const long = coordsAndProperName[0];
     // Encode the target URL with the appropriate route, parameters, and model
     const targetUrl = encodeURIComponent(
       `http://repicea.dynu.net/biosim/BioSimWeather?lat=` +
-        `${lat}&long=${long}&from=2024&to=2100&model=Climatic_Annual&rcp=8_5` +
-        `&climMod=GCM4&format=json`,
+        `${lat}&long=${long}&from=${currentDate}&to=2100&model=Climatic` +
+        `_Annual&rcp=8_5&climMod=GCM4&format=json`,
     );
     // Fetch the data 10 times using a CORS proxy to avoid cross-origin issues
     const responses = await Promise.all(
@@ -206,33 +207,38 @@ async function getClimateDetails(coordinates) {
         return response.json();
       }),
     );
-    let meanHigh2024 = 0;
-    let highest2024 = 0;
-    let totalPrcp2024 = 0;
-    let meanHigh2100 = 0;
-    let highest2100 = 0;
-    let totalPrcp2100 = 0;
+    let meanHighCurr = 0;
+    let highestCurr = 0;
+    let totalPrcpCurr = 0;
+    let meanHighFuture = 0;
+    let highestFuture = 0;
+    let totalPrcpFuture = 0;
     for (let i = 0; i < results.length; i++) {
-      meanHigh2024 +=
+      meanHighCurr +=
         (Number(results[i].Climatic_Annual[0][0][0].MeanTmax) * 9) / 5 + 32;
-      highest2024 +=
+      highestCurr +=
         (Number(results[i].Climatic_Annual[0][0][0].HitghestTmax) * 9) / 5 + 32;
-      totalPrcp2024 += Number(results[i].Climatic_Annual[0][0][0].TotalPrcp);
-      meanHigh2100 +=
+      totalPrcpCurr += Number(results[i].Climatic_Annual[0][0][0].TotalPrcp);
+      meanHighFuture +=
         (Number(results[i].Climatic_Annual[0][0][76].MeanTmax) * 9) / 5 + 32;
-      highest2100 +=
+      highestFuture +=
         (Number(results[i].Climatic_Annual[0][0][76].HitghestTmax) * 9) / 5 +
         32;
-      totalPrcp2100 += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
+      totalPrcpFuture += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
     const averagedResultObj = {
-      meanHigh2024: (meanHigh2024 / results.length).toFixed() + '°F',
-      highest2024: (highest2024 / results.length).toFixed() + '°F',
-      totalPrcp2024: (totalPrcp2024 / results.length).toFixed() + 'mm',
-      meanHigh2100: (meanHigh2100 / results.length).toFixed() + '°F',
-      highest2100: (highest2100 / results.length).toFixed() + '°F',
-      totalPrcp2100: (totalPrcp2100 / results.length).toFixed() + 'mm',
-      properLocationName: coordinates[2],
+      meanOfHighTempsCurrentYear:
+        (meanHighCurr / results.length).toFixed() + '°F',
+      highestTempOfCurrentYear: (highestCurr / results.length).toFixed() + '°F',
+      totalPrecipitationCurrentYear:
+        (totalPrcpCurr / results.length).toFixed() + 'mm',
+      meanOfHighTempsFutureYear:
+        (meanHighFuture / results.length).toFixed() + '°F',
+      highestTempOfFutureYear:
+        (highestFuture / results.length).toFixed() + '°F',
+      totalPrecipitationFutureYear:
+        (totalPrcpFuture / results.length).toFixed() + 'mm',
+      properLocationName: coordsAndProperName[2],
     };
     return averagedResultObj;
   } catch (error) {
@@ -240,29 +246,23 @@ async function getClimateDetails(coordinates) {
     throw error;
   }
 }
-async function getRequest(userEntry) {
-  const coordsArr = await getCoordinates(userEntry);
+async function getRequest(locationEntry, yearEntry = '2100') {
+  console.log(yearEntry); //update the getClimateDetails() function to take a year parameter and have that reflect in the call. Then pass it through or add it to the climate Obj or something.
+  const coordsArr = await getCoordinates(locationEntry);
   const climateDataObj = await getClimateDetails(coordsArr);
-  const resultDescription = `highest 2024:
-    ${climateDataObj.highest2024},
-
-     mean high 2024:
-     ${climateDataObj.meanHigh2024},
-
-     total precipitation 2024:
-     ${climateDataObj.totalPrcp2024},
-
-     highest 2100:
-     ${climateDataObj.highest2100},
-
-     mean high 2100:
-     ${climateDataObj.meanHigh2100},
-
-     total precipitation 2100:
-     ${climateDataObj.totalPrcp2100}`;
+  const printClimateDataObj = JSON.stringify(
+    climateDataObj,
+    (key, value) => {
+      if (key === 'properLocationName') {
+        return undefined;
+      }
+      return value;
+    },
+    2,
+  );
   return [
     climateDataObj.properLocationName,
-    resultDescription,
+    printClimateDataObj,
     `/images/DALL·E 2024-03-06 09.38.46 - Capture the essence of Irvine, ` +
       `California, with a focus on its distinctive characteristics. The image ` +
       `should feature the blend of urban and suburban e.webp`,
