@@ -425,10 +425,10 @@ async function getClimateDetails(coordsAndProperName, futureYear) {
 //   ];
 // }
 function getRandomColor() {
-  const r = Math.floor(Math.random() * 256); // Random between 0-255
-  const g = Math.floor(Math.random() * 256); // Random between 0-255
-  const b = Math.floor(Math.random() * 256); // Random between 0-255
-  return `rgb(${r}, ${g}, ${b})`; // Construct RGB color string
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
 }
 async function fetchChartUrl(object) {
   try {
@@ -562,14 +562,31 @@ async function fetchChartUrl(object) {
     return chartImageUrl;
   } catch (error) {
     console.error('Error fetching chart image URL:', error);
+    throw error;
   }
 }
 async function getRequest(locationEntry, yearEntry = '2100') {
   const coordsAndNameArr = await getCoordinatesAndFormatName(locationEntry);
   const climateDataObj = await getClimateDetails(coordsAndNameArr, yearEntry);
-  const dataForAnalysis = JSON.stringify(climateDataObj, null, 2);
+  const stringOfData = `Mean of High Temps of ${currentDate}: ${climateDataObj.meanOfHighTempsCurrentYear}<br><br>
+
+Mean of High Temps of ${climateDataObj.futureYear}: ${climateDataObj.meanOfHighTempsFutureYear}<br><br>
+
+Percent Increase/Decrease: ${(((Number(climateDataObj.meanOfHighTempsFutureYear.replace(/°F/g, '')) - Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
+
+Highest Temp of ${currentDate}: ${climateDataObj.highestTempOfCurrentYear}<br><br>
+
+Highest Temp of ${climateDataObj.futureYear}: ${climateDataObj.highestTempOfFutureYear}<br><br>
+
+Percent Increase/Decrease: ${(((Number(climateDataObj.highestTempOfFutureYear.replace(/°F/g, '')) - Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
+
+Total Precipitation in ${currentDate}: ${climateDataObj.totalPrecipitationCurrentYear}<br><br>
+
+Total Precipitation in ${climateDataObj.futureYear}: ${climateDataObj.totalPrecipitationFutureYear}<br><br>
+
+Percent Increase/Decrease: ${(((Number(climateDataObj.totalPrecipitationFutureYear.replace(/mm/g, '')) - Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) / Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) * 100).toFixed(2) + '%'}`;
   const chartImgURL = await fetchChartUrl(climateDataObj);
-  return [climateDataObj.formattedLocationName, dataForAnalysis, chartImgURL];
+  return [climateDataObj.formattedLocationName, stringOfData, chartImgURL];
 }
 function viewSwap(view) {
   if (view === 'landing-page') {

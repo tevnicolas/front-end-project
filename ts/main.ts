@@ -299,213 +299,14 @@ async function getClimateDetails(
   }
 }
 
-// // Implement all of this at a later date :(
-// const apiKey = '';
-
-// async function generateImage(promptText: string): Promise<string> {
-//   try {
-//     const data = {
-//       prompt: promptText,
-//       model: 'dall-e-3',
-//       n: 1,
-//       size: '1024x1024',
-//       quality: 'standard',
-//     };
-
-//     const response = await fetch(
-//       'https://api.openai.com/v1/images/generations',
-//       {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${apiKey}`,
-//         },
-//         body: JSON.stringify(data),
-//       },
-//     );
-
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! status: ${response.status}`);
-//     }
-
-//     const responseData = await response.json();
-
-//     return responseData.data[0].url;
-//   } catch (error) {
-//     console.error('Error generating image:', error);
-//     throw error;
-//   }
-// }
-
-// async function startAnalysisThread(promptText: string): Promise<string> {
-//   try {
-//     const threadResponse = await fetch('https://api.openai.com/v1/threads', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         Authorization: `Bearer ${apiKey}`,
-//         'OpenAI-Beta': 'assistants=v1',
-//       },
-//     });
-
-//     if (!threadResponse.ok) {
-//       throw new Error(
-//         `HTTP error when creating a thread! status: ${threadResponse.status}`,
-//       );
-//     }
-
-//     const threadData = await threadResponse.json();
-//     const threadId = threadData.id;
-
-//     const data = {
-//       role: 'user',
-//       content: promptText,
-//     };
-
-//     const inputResponse = await fetch(
-//       `https://api.openai.com/v1/threads/${threadId}/messages`,
-//       {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${apiKey}`,
-//           'OpenAI-Beta': 'assistants=v1',
-//         },
-//         body: JSON.stringify(data),
-//       },
-//     );
-
-//     if (!inputResponse.ok) {
-//       throw new Error(
-//         `HTTP error when adding input message! Status: ${inputResponse.status}`,
-//       );
-//     }
-//     return threadId;
-//   } catch (error) {
-//     console.log('Throw getClimateAnalysis Error', error);
-//     throw error;
-//   }
-// }
-
-// async function createAnalysisRun(threadId: string): Promise<string> {
-//   try {
-//     const runResponse = await fetch(
-//       `https://api.openai.com/v1/threads/${threadId}/runs`,
-//       {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${apiKey}`,
-//           'OpenAI-Beta': 'assistants=v1',
-//         },
-//         body: JSON.stringify({ assistant_id: 'asst_zugUooF8ONOkoEqoD2Hc0wWz' }),
-//       },
-//     );
-
-//     if (!runResponse.ok) {
-//       throw new Error(
-//         `HTTP error in creating a run Status ${runResponse.status}`,
-//       );
-//     }
-
-//     const runData = await runResponse.json();
-//     await waitForRunCompletion(threadId, runData.id);
-
-//     return runData.thread_id;
-//   } catch (error) {
-//     console.log('Error creating a run: ', error);
-//     throw error;
-//   }
-// }
-
-// async function waitForRunCompletion(
-//   threadId: string,
-//   runId: string,
-// ): Promise<void> {
-//   let runCompleted = false;
-//   while (!runCompleted) {
-//     const runStatusResponse = await fetch(
-//       `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`,
-//       {
-//         method: 'GET',
-//         headers: {
-//           Authorization: `Bearer ${apiKey}`,
-//           'OpenAI-Beta': 'assistants=v1',
-//         },
-//       },
-//     );
-
-//     const runStatusData = await runStatusResponse.json();
-//     if (runStatusData.status === 'completed') {
-//       runCompleted = true;
-//     } else {
-//       // Wait for a short period before polling again
-//       await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
-//     }
-//   }
-// }
-
-// async function getAnalysisResponse(runThreadId: string): Promise<string> {
-//   try {
-//     const messagesResponse = await fetch(
-//       `https://api.openai.com/v1/threads/${runThreadId}/messages`,
-//       {
-//         method: 'GET',
-//         headers: {
-//           Authorization: `Bearer ${apiKey}`, // Replace with your actual API key
-//           'OpenAI-Beta': 'assistants=v1',
-//         },
-//       },
-//     );
-
-//     if (!messagesResponse.ok) {
-//       throw new Error(
-//         `HTTP error when fetching messages! Status: ${messagesResponse.status}`,
-//       );
-//     }
-
-//     const messagesData = await messagesResponse.json();
-//     const analysisResponse = messagesData.data[0].content[0].text.value;
-
-//     return analysisResponse;
-//   } catch (error) {
-//     console.error('Error fetching Assistant responses:', error);
-//     throw error;
-//   }
-// }
-
-// async function getRequest(
-//   locationEntry: string,
-//   yearEntry = '2100',
-// ): Promise<string[]> {
-//   const coordsAndNameArr = await getCoordinatesAndFormatName(locationEntry);
-//   const imageGenerationPromise = generateImage(
-//     `${coordsAndNameArr[2]} faces climate hardship`,
-//   );
-//   const climateDataObj = await getClimateDetails(coordsAndNameArr, yearEntry);
-//   const dataForAnalysis = JSON.stringify(climateDataObj, null, 2);
-//   const threadId = await startAnalysisThread(dataForAnalysis);
-//   const runThreadId = await createAnalysisRun(threadId);
-//   const analysis = (await getAnalysisResponse(runThreadId)).replace(
-//     /\n/g,
-//     '<br>',
-//   );
-//   const generatedImageResponse = await imageGenerationPromise;
-//   return [
-//     climateDataObj.formattedLocationName,
-//     analysis,
-//     generatedImageResponse, //Link expires after 2 hours, find a way to download image to local storage
-//   ];
-// }
-
 function getRandomColor(): string {
-  const r = Math.floor(Math.random() * 256); // Random between 0-255
-  const g = Math.floor(Math.random() * 256); // Random between 0-255
-  const b = Math.floor(Math.random() * 256); // Random between 0-255
-  return `rgb(${r}, ${g}, ${b})`; // Construct RGB color string
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
-async function fetchChartUrl(object: Temps): string {
+async function fetchChartUrl(object: Temps): Promise<string> {
   try {
     const chartConfig = {
       type: 'bar',
@@ -641,6 +442,7 @@ async function fetchChartUrl(object: Temps): string {
     return chartImageUrl;
   } catch (error) {
     console.error('Error fetching chart image URL:', error);
+    throw error;
   }
 }
 
@@ -650,10 +452,26 @@ async function getRequest(
 ): Promise<string[]> {
   const coordsAndNameArr = await getCoordinatesAndFormatName(locationEntry);
   const climateDataObj = await getClimateDetails(coordsAndNameArr, yearEntry);
-  const dataForAnalysis = JSON.stringify(climateDataObj, null, 2);
+  const stringOfData = `Mean of High Temps of ${currentDate}: ${climateDataObj.meanOfHighTempsCurrentYear}<br><br>
+
+Mean of High Temps of ${climateDataObj.futureYear}: ${climateDataObj.meanOfHighTempsFutureYear}<br><br>
+
+Percent Increase/Decrease: ${(((Number(climateDataObj.meanOfHighTempsFutureYear.replace(/°F/g, '')) - Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
+
+Highest Temp of ${currentDate}: ${climateDataObj.highestTempOfCurrentYear}<br><br>
+
+Highest Temp of ${climateDataObj.futureYear}: ${climateDataObj.highestTempOfFutureYear}<br><br>
+
+Percent Increase/Decrease: ${(((Number(climateDataObj.highestTempOfFutureYear.replace(/°F/g, '')) - Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
+
+Total Precipitation in ${currentDate}: ${climateDataObj.totalPrecipitationCurrentYear}<br><br>
+
+Total Precipitation in ${climateDataObj.futureYear}: ${climateDataObj.totalPrecipitationFutureYear}<br><br>
+
+Percent Increase/Decrease: ${(((Number(climateDataObj.totalPrecipitationFutureYear.replace(/mm/g, '')) - Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) / Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) * 100).toFixed(2) + '%'}`;
 
   const chartImgURL = await fetchChartUrl(climateDataObj);
-  return [climateDataObj.formattedLocationName, dataForAnalysis, chartImgURL];
+  return [climateDataObj.formattedLocationName, stringOfData, chartImgURL];
 }
 
 function viewSwap(view: string): void {
