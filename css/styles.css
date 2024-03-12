@@ -134,9 +134,9 @@ header {
 }
 
 .short-row h1 {
+  display: block;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
-  /* stylelint-disable-next-line value-no-vendor-prefix */
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3; /* Limits the text to 3 lines */
   overflow: hidden;
@@ -174,9 +174,9 @@ header {
 }
 
 .short-paragraph {
+  display: block;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
-  /* stylelint-disable-next-line value-no-vendor-prefix */
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 10; /* Limits the text to 3 lines */
   overflow: hidden;
