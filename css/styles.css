@@ -178,8 +178,8 @@ header {
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 10; /* Limits the text to 3 lines */
   overflow: hidden;
+  -webkit-line-clamp: 10;
 }
 
 .no-entries {
@@ -188,6 +188,13 @@ header {
 
 .pointer {
   cursor: pointer;
+}
+
+.edit-icon {
+  display: flex;
+  color: black;
+  font-size: 20px;
+  justify-content: right;
 }
 
 @media screen and (max-width: 767px) {

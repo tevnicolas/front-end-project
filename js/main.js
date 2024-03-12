@@ -6,6 +6,7 @@ const $landingPage = document.querySelector('div[data-view="landing-page"]');
 const $formPage = document.querySelector('div[data-view="form-page"]');
 const $entriesPage = document.querySelector('div[data-view="entries-page"]');
 const $loadingPage = document.querySelector('div[data-view="loading-page"]');
+const $editPage = document.querySelector('div[data-view="edit-page"]');
 const $formHook = document.querySelector('.form-page');
 const $entriesHook = document.querySelector('.entries-page');
 const $header = document.querySelector('#header');
@@ -14,6 +15,7 @@ const $entriesText = document.querySelector('#entries-text');
 const $newEntryButtonFormPage = document.querySelector(
   '.form-page .buttonpos1',
 );
+const $editButtonFormPage = document.querySelector('.form-page .buttonpos2');
 const $newEntryButtonEntriesPage = document.querySelector(
   '.entries-page .buttonpos1',
 );
@@ -23,6 +25,7 @@ if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
+if (!$editPage) throw new Error('$editPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
 if (!$entriesHook) throw new Error('$entriesHook query failed.');
 if (!$header) throw new Error('$header query failed.');
@@ -73,20 +76,25 @@ $formHook.addEventListener('click', (event) => {
     case $newEntryButtonFormPage:
       viewSwap('landing-page');
       break;
+    case $editButtonFormPage:
+      viewSwap('edit-page');
+      break;
   }
 });
 $entriesHook.addEventListener('click', (event) => {
   event.preventDefault();
   const $eventTarget = event.target;
+  const $shortRowTarget = $eventTarget.closest('[data-entry-id]');
+  const dataEntryIDTarget = Number(
+    $shortRowTarget.getAttribute('data-entry-id'),
+  );
   if ($eventTarget === $newEntryButtonEntriesPage) {
     viewSwap('landing-page');
   } else if ($eventTarget.tagName === 'H1') {
-    const $shortRowTarget = $eventTarget.closest('[data-entry-id]');
-    const dataEntryIDTarget = Number(
-      $shortRowTarget.getAttribute('data-entry-id'),
-    );
     hideOtherEntriesExcept(dataEntryIDTarget);
     viewSwap('form-page');
+  } else if ($eventTarget.tagName === 'I') {
+    viewSwap('edit-page');
   }
 });
 document.addEventListener('DOMContentLoaded', () => {
@@ -125,8 +133,16 @@ function render(entry, option) {
   const $description = document.createElement('p');
   $description.setAttribute('class', pType);
   $description.innerHTML = entry.resultDescription;
+  const $editIcon = document.createElement('i');
+  $editIcon.setAttribute('class', 'fa fa-edit');
   $divTextual.appendChild($cityHeading);
   $divTextual.appendChild($description);
+  if (option === 'short') {
+    const $iconContainer = document.createElement('div');
+    $iconContainer.setAttribute('class', 'edit-icon');
+    $iconContainer.appendChild($editIcon);
+    $divTextual.appendChild($iconContainer);
+  }
   $divColHalf2.appendChild($divTextual);
   $divImageContainer.appendChild($image);
   $divColHalf.appendChild($divImageContainer);
@@ -391,25 +407,50 @@ async function fetchChartUrl(object) {
 async function getRequest(locationEntry, yearEntry = '2100') {
   const coordsAndNameArr = await getCoordinatesAndFormatName(locationEntry);
   const climateDataObj = await getClimateDetails(coordsAndNameArr, yearEntry);
-  const stringOfData = `Mean of High Temps of ${currentDate}: ${climateDataObj.meanOfHighTempsCurrentYear}<br><br>
-
-Mean of High Temps of ${climateDataObj.futureYear}: ${climateDataObj.meanOfHighTempsFutureYear}<br><br>
-
-Percent Increase/Decrease: ${(((Number(climateDataObj.meanOfHighTempsFutureYear.replace(/°F/g, '')) - Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
-
-Highest Temp of ${currentDate}: ${climateDataObj.highestTempOfCurrentYear}<br><br>
-
-Highest Temp of ${climateDataObj.futureYear}: ${climateDataObj.highestTempOfFutureYear}<br><br>
-
-Percent Increase/Decrease: ${(((Number(climateDataObj.highestTempOfFutureYear.replace(/°F/g, '')) - Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
-
-Total Precipitation in ${currentDate}: ${climateDataObj.totalPrecipitationCurrentYear}<br><br>
-
-Total Precipitation in ${climateDataObj.futureYear}: ${climateDataObj.totalPrecipitationFutureYear}<br><br>
-
-Percent Increase/Decrease: ${(((Number(climateDataObj.totalPrecipitationFutureYear.replace(/mm/g, '')) - Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) / Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) * 100).toFixed(2) + '%'}`;
+  const analysis = `Mean of High Temps of ${currentDate}:
+  ${climateDataObj.meanOfHighTempsCurrentYear}<br><br>
+  Mean of High Temps of ${climateDataObj.futureYear}:
+  ${climateDataObj.meanOfHighTempsFutureYear}<br><br>
+  Percent Change:
+  ${
+    (
+      ((Number(climateDataObj.meanOfHighTempsFutureYear.replace(/°F/g, '')) -
+        Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) /
+        Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) *
+      100
+    ).toFixed(2) + '%'
+  }<br><br>
+  Highest Temp of ${currentDate}:
+  ${climateDataObj.highestTempOfCurrentYear}<br><br>
+  Highest Temp of ${climateDataObj.futureYear}:
+  ${climateDataObj.highestTempOfFutureYear}<br><br>
+  Percent Change:
+  ${
+    (
+      ((Number(climateDataObj.highestTempOfFutureYear.replace(/°F/g, '')) -
+        Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) /
+        Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) *
+      100
+    ).toFixed(2) + '%'
+  }<br><br>
+  Total Precipitation in ${currentDate}:
+  ${climateDataObj.totalPrecipitationCurrentYear}<br><br>
+  Total Precipitation in ${climateDataObj.futureYear}:
+  ${climateDataObj.totalPrecipitationFutureYear}<br><br>
+  Percent Change: ${
+    (
+      ((Number(climateDataObj.totalPrecipitationFutureYear.replace(/mm/g, '')) -
+        Number(
+          climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''),
+        )) /
+        Number(
+          climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''),
+        )) *
+      100
+    ).toFixed(2) + '%'
+  }`;
   const chartImgURL = await fetchChartUrl(climateDataObj);
-  return [climateDataObj.formattedLocationName, stringOfData, chartImgURL];
+  return [climateDataObj.formattedLocationName, analysis, chartImgURL];
 }
 function viewSwap(view) {
   if (view === 'landing-page') {
@@ -417,22 +458,32 @@ function viewSwap(view) {
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
     $form.reset();
   } else if (view === 'form-page') {
     $formPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
   } else if (view === 'entries-page') {
     $entriesPage.setAttribute('class', '');
     $formPage.setAttribute('class', 'hidden');
     $landingPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
     toggleNoEntries();
   } else if (view === 'loading-page') {
     $loadingPage.setAttribute('class', '');
     $entriesPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
     $landingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
+  } else if (view === 'edit-page') {
+    $editPage.setAttribute('class', '');
+    $landingPage.setAttribute('class', 'hidden');
+    $formPage.setAttribute('class', 'hidden');
+    $entriesPage.setAttribute('class', 'hidden');
+    $loadingPage.setAttribute('class', 'hidden');
   }
 }
