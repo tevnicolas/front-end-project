@@ -205,7 +205,6 @@ async function getCoordinatesAndFormatName(
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
-    console.log(result);
     const properLocationName: string = result.features[0].properties.formatted;
     const coordinatesArr: number[] = result.features[0].geometry.coordinates;
     return [...coordinatesArr, properLocationName];
