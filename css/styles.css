@@ -1,5 +1,6 @@
 @font-face {
   font-family: 'Roboto Mono';
+  /* stylelint-disable-next-line */
   src: url('../Fonts/Roboto_Mono/static/RobotoMono-Regular.ttf')
     format('truetype');
   font-weight: 400;
@@ -45,8 +46,10 @@ header {
   min-width: 320px;
 }
 
-.entries-text {
-  min-width: 100px;
+.header-anchors {
+  width: 100px;
+  color: white;
+  text-decoration-line: none;
 }
 
 .intro-text {
@@ -89,7 +92,8 @@ header {
   padding: 5px;
 }
 
-.form-page {
+.form-page,
+.short-row {
   position: relative;
   margin-right: 100px;
   margin-left: 30px;
@@ -102,10 +106,22 @@ header {
     -25px 0 20px -20px rgba(0, 0, 0, 0.3);
 }
 
-.image {
-  width: 100%;
+.entries-page {
+  position: relative;
+  margin-right: 100px;
+  margin-left: 30px;
+  margin-top: 30px;
+}
 
-  /* height: 100%; */
+.short-row {
+  margin-right: 0;
+  margin-left: 0;
+  margin-top: 0;
+  height: 50%;
+}
+
+.image {
+  width: 108%;
 }
 
 .image-container {
@@ -117,21 +133,35 @@ header {
   margin: 20px;
 }
 
+.short-row h1 {
+  display: block;
+  /* stylelint-disable-next-line value-no-vendor-prefix */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* Limits the text to 3 lines */
+  overflow: hidden;
+}
+
 .buttonpos1 {
-  width: 85px;
   position: absolute;
+  width: 86px;
+  font-size: 12px;
   top: 0;
   right: -100px;
 }
 
 .buttonpos2 {
   position: absolute;
+  width: 86px;
+  font-size: 12px;
   top: 40px;
   right: -100px;
 }
 
 .buttonpos3 {
   position: absolute;
+  width: 86px;
+  font-size: 12px;
   top: 80px;
   right: -100px;
 }
@@ -143,12 +173,39 @@ header {
   font-size: 20px;
 }
 
+.short-paragraph {
+  display: block;
+  /* stylelint-disable-next-line value-no-vendor-prefix */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 10; /* Limits the text to 3 lines */
+  overflow: hidden;
+}
+
+.no-entries {
+  text-align: center;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
 @media screen and (max-width: 767px) {
-  .form-page {
+  .form-page,
+  .entries-page,
+  .short-row {
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
     margin-top: 60px;
+  }
+
+  .image {
+    width: 100%;
+  }
+
+  .short-row > .column-half {
+    width: 100%;
   }
 
   .buttonpos1 {
@@ -168,6 +225,10 @@ header {
     top: -40px;
     right: auto;
   }
+
+  .short-paragraph {
+    -webkit-line-clamp: 8;
+  }
 }
 
 @media screen and (max-width: 442px) {
@@ -182,5 +243,11 @@ header {
 
   .landing-page-row {
     width: 90vw;
+  }
+}
+
+@media screen and (max-width: 424px) {
+  .short-paragraph {
+    -webkit-line-clamp: 6;
   }
 }
