@@ -1,11 +1,14 @@
-interface FormElement extends HTMLFormControlsCollection {
+interface FormElements extends HTMLFormControlsCollection {
   city: HTMLInputElement;
   futureYear?: HTMLSelectElement;
 }
 
 const currentDate = new Date().getFullYear();
+let dataEntryIDTarget = 0;
 const $landingForm = document.querySelector('.landing-form') as HTMLFormElement;
-const $landingFormElements = $landingForm.elements as FormElement;
+const $landingFormElements = $landingForm.elements as FormElements;
+const $editForm = document.querySelector('.edit-form') as HTMLFormElement;
+const $editFormElements = $editForm.elements as FormElements;
 const $landingPage = document.querySelector(
   'div[data-view="landing-page"]',
 ) as HTMLDivElement;
@@ -34,10 +37,17 @@ const $newEntryButtonEntriesPage = document.querySelector(
   '.entries-page .buttonpos1',
 );
 const $noEntries = document.querySelector('.no-entries') as HTMLDivElement;
-const $yearSelect = document.querySelector('#year-select');
+const $yearSelect = document.querySelector('#futureYear');
+const $editPageDescription = document.querySelector(
+  '#edit-form p',
+) as HTMLParagraphElement;
+const $editPageImage = document.querySelector(
+  '.edit-page img',
+) as HTMLImageElement;
 
-if (!$landingForm) throw new Error('$form query failed.');
+if (!$landingForm) throw new Error('$landingform query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
+if (!$editForm) throw new Error('$editform query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
@@ -53,14 +63,17 @@ if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
 if (!$noEntries) throw new Error('$noEntries query failed.');
 if (!$yearSelect) throw new Error('$yearSelect query failed.');
+if (!$editPageDescription)
+  throw new Error('$editPageDescription query failed.');
+if (!$editPageImage) throw new Error('$editPageImage query failed.');
 
 $landingForm.addEventListener('submit', async (event: Event) => {
   event.preventDefault();
   viewSwap('loading-page');
   const getRequestArr = await getRequest($landingFormElements.city.value);
   const entriesObject: EntriesObject = {
-    title: getRequestArr[0],
-    year: '2100',
+    city: getRequestArr[0],
+    futureYear: '2100',
     resultDescription: getRequestArr[1],
     imageLink: getRequestArr[2],
     entryId: data.nextEntryId,
@@ -71,8 +84,7 @@ $landingForm.addEventListener('submit', async (event: Event) => {
   $formHook.prepend($newRowTreeFormStyle);
   const $newRowTreeEntriesStyle = render(entriesObject, 'short');
   $entriesHook.prepend($newRowTreeEntriesStyle);
-
-  hideOtherEntriesExcept('last');
+  hideEntriesExceptNewIdTarget('last');
   viewSwap('form-page');
   $landingForm.reset();
 });
@@ -98,10 +110,25 @@ $formHook.addEventListener('click', (event: Event): void => {
       viewSwap('landing-page');
       break;
     case $editButtonFormPage:
-      viewSwap('edit-page');
+      fillInEditForm();
       break;
   }
 });
+
+function fillInEditForm(): void {
+  for (const entry of data.entries) {
+    if (dataEntryIDTarget === entry.entryId) {
+      data.editing = entry;
+    }
+  }
+  $editFormElements.city.value = data.editing?.city as string;
+  $editFormElements.futureYear!.value = data.editing?.futureYear as string;
+  $editPageDescription.innerHTML = data.editing?.resultDescription as string;
+  $editPageImage.setAttribute('src', data.editing?.imageLink as string);
+  viewSwap('edit-page');
+  $editFormElements.city.focus();
+  $editFormElements.city.select();
+}
 
 $entriesHook.addEventListener('click', (event: Event): void => {
   event.preventDefault();
@@ -109,18 +136,14 @@ $entriesHook.addEventListener('click', (event: Event): void => {
   const $shortRowTarget = $eventTarget.closest(
     '[data-entry-id]',
   ) as HTMLDivElement | null;
-  console.log($eventTarget);
-  const dataEntryIDTarget = Number(
-    $shortRowTarget?.getAttribute('data-entry-id'),
-  );
+  dataEntryIDTarget = Number($shortRowTarget?.getAttribute('data-entry-id'));
   if ($eventTarget === $newEntryButtonEntriesPage) {
     viewSwap('landing-page');
-    console.log('hello');
   } else if ($eventTarget.tagName === 'H1') {
-    hideOtherEntriesExcept(dataEntryIDTarget!);
+    hideEntriesExceptNewIdTarget(dataEntryIDTarget);
     viewSwap('form-page');
   } else if ($eventTarget.tagName === 'I') {
-    viewSwap('edit-page');
+    fillInEditForm();
   }
 });
 
@@ -157,14 +180,14 @@ function render(entry: EntriesObject, option: string): HTMLDivElement {
   const $image = document.createElement('img');
   $image.setAttribute('class', 'image');
   $image.setAttribute('src', entry.imageLink);
-  $image.setAttribute('alt', entry.title);
+  $image.setAttribute('alt', entry.city);
   const $divColHalf2 = document.createElement('div');
   $divColHalf2.setAttribute('class', 'column-half');
   const $divTextual = document.createElement('div');
   $divTextual.setAttribute('class', 'textual');
   const $cityHeading = document.createElement('h1');
   $cityHeading.setAttribute('class', pointer);
-  $cityHeading.textContent = entry.title;
+  $cityHeading.textContent = entry.city;
   const $description = document.createElement('p');
   $description.setAttribute('class', pType);
   $description.innerHTML = entry.resultDescription;
@@ -188,19 +211,18 @@ function render(entry: EntriesObject, option: string): HTMLDivElement {
   return $divRow;
 }
 
-function hideOtherEntriesExcept(option: string | number): void {
-  let entryNum = 0;
+function hideEntriesExceptNewIdTarget(option: string | number): void {
   const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
   if (option === 'last') {
-    entryNum = $listOfFormEntries.length;
+    dataEntryIDTarget = $listOfFormEntries.length;
   } else {
-    entryNum = option as number;
+    dataEntryIDTarget = option as number;
   }
   for (let i = 0; i <= $listOfFormEntries.length; i++) {
     const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
-    if (i !== entryNum) {
+    if (i !== dataEntryIDTarget) {
       $hideOtherEntries?.setAttribute('class', 'row hidden');
     } else {
       $hideOtherEntries?.setAttribute('class', 'row');
