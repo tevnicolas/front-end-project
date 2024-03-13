@@ -93,7 +93,7 @@ $formHook.addEventListener('click', (event) => {
   }
 });
 function fillInEditForm() {
-  for (let entry of data.entries) {
+  for (const entry of data.entries) {
     if (dataEntryIDTarget === entry.entryId) {
       data.editing = entry;
     }

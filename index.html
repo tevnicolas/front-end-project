@@ -67,40 +67,48 @@
         </div>
       </div>
       <div data-view="edit-page" class="hidden">
-        <div class="edit-page row">
-          <div class="column-half">
-            <div class="image-container">
-              <img
-                class="image"
-                src=""
-                alt="Los Angeles, CA, United States of America" />
+        <div class="edit-page">
+          <div class="row">
+            <div class="column-half">
+              <div class="image-container">
+                <img
+                  class="image"
+                  src=""
+                  alt="Los Angeles, CA, United States of America" />
+              </div>
+            </div>
+            <div class="column-half">
+              <form
+                id="edit-form"
+                class="edit-form"
+                name="edit-form"
+                method="post">
+                <label class="edit-form-label" for="city">Change City:</label>
+                <input
+                  required="true"
+                  value=""
+                  class="edit-input"
+                  type="text"
+                  id="change-city"
+                  name="city" />
+                <div class="flex-select">
+                  <label class="edit-form-label" for="futureYear">
+                    Change Future Year:
+                  </label>
+                  <select
+                    id="futureYear"
+                    class="edit-select"
+                    name="futureYear"></select>
+                </div>
+                <p></p>
+                <button type="submit" class="button buttonpos1 green">
+                  Save
+                </button>
+                <button class="button buttonpos2 blue">Revert</button>
+                <button class="button buttonpos3">Delete Entry</button>
+              </form>
             </div>
           </div>
-          <form
-            id="edit-form"
-            class="column-half edit-form"
-            name="edit-form"
-            method="post">
-            <label class="edit-form-label" for="city">Change City:</label>
-            <input
-              required="true"
-              value=""
-              class="edit-input"
-              type="text"
-              id="change-city"
-              name="city" />
-            <label class="edit-form-label" for="futureYear"
-              >Change Future Year:</label
-            >
-            <select
-              id="futureYear"
-              class="edit-select"
-              name="futureYear"></select>
-            <p></p>
-            <button type="submit" class="button buttonpos1 green">Save</button>
-            <button class="button buttonpos2 blue">Revert</button>
-            <button class="button buttonpos3">Delete Entry</button>
-          </form>
         </div>
       </div>
       <div data-view="entries-page" class="hidden">
