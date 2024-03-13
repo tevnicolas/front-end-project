@@ -1,7 +1,7 @@
 'use strict';
 const currentDate = new Date().getFullYear();
-const $form = document.querySelector('.landing-form');
-const $landingFormElements = $form.elements;
+const $landingForm = document.querySelector('.landing-form');
+const $landingFormElements = $landingForm.elements;
 const $landingPage = document.querySelector('div[data-view="landing-page"]');
 const $formPage = document.querySelector('div[data-view="form-page"]');
 const $entriesPage = document.querySelector('div[data-view="entries-page"]');
@@ -20,7 +20,8 @@ const $newEntryButtonEntriesPage = document.querySelector(
   '.entries-page .buttonpos1',
 );
 const $noEntries = document.querySelector('.no-entries');
-if (!$form) throw new Error('$form query failed.');
+const $yearSelect = document.querySelector('#year-select');
+if (!$landingForm) throw new Error('$form query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
@@ -36,7 +37,8 @@ if (!$newEntryButtonFormPage)
 if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
 if (!$noEntries) throw new Error('$noEntries query failed.');
-$form.addEventListener('submit', async (event) => {
+if (!$yearSelect) throw new Error('$yearSelect query failed.');
+$landingForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
   const getRequestArr = await getRequest($landingFormElements.city.value);
@@ -55,7 +57,7 @@ $form.addEventListener('submit', async (event) => {
   $entriesHook.prepend($newRowTreeEntriesStyle);
   hideOtherEntriesExcept('last');
   viewSwap('form-page');
-  $form.reset();
+  $landingForm.reset();
 });
 $header.addEventListener('click', (event) => {
   event.preventDefault();
@@ -85,11 +87,13 @@ $entriesHook.addEventListener('click', (event) => {
   event.preventDefault();
   const $eventTarget = event.target;
   const $shortRowTarget = $eventTarget.closest('[data-entry-id]');
+  console.log($eventTarget);
   const dataEntryIDTarget = Number(
-    $shortRowTarget.getAttribute('data-entry-id'),
+    $shortRowTarget?.getAttribute('data-entry-id'),
   );
   if ($eventTarget === $newEntryButtonEntriesPage) {
     viewSwap('landing-page');
+    console.log('hello');
   } else if ($eventTarget.tagName === 'H1') {
     hideOtherEntriesExcept(dataEntryIDTarget);
     viewSwap('form-page');
@@ -104,9 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
     $formHook.appendChild($newRowTreeFormStyle);
     $entriesHook.appendChild($newRowTreeEntriesStyle);
   }
+  for (let i = 2100; i >= currentDate; i--) {
+    const $optionYear = document.createElement('option');
+    $optionYear.setAttribute('value', String(i));
+    $optionYear.textContent = String(i);
+    $yearSelect.appendChild($optionYear);
+  }
   toggleNoEntries(); // not sure if I need this here
   viewSwap(data.view); // not certain why this is here yet
-  $form.reset(); // also not 100% if this needs to be here
+  $landingForm.reset(); // also not 100% if this needs to be here
 });
 function render(entry, option) {
   const rowType = option === 'short' ? 'short-row' : 'row';
@@ -459,7 +469,7 @@ function viewSwap(view) {
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
     $editPage.setAttribute('class', 'hidden');
-    $form.reset();
+    $landingForm.reset();
   } else if (view === 'form-page') {
     $formPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');

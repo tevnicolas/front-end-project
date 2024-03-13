@@ -39,16 +39,16 @@
             class="column-full landing-form"
             name="landing-form"
             method="post">
-            <label class="inputs label" for="city">
+            <label class="landing-inputs label" for="city">
               Enter a city for a unique climate analysis:
             </label>
             <input
               required="true"
-              class="inputs"
+              class="landing-inputs"
               type="text"
               id="city"
               name="city" />
-            <div class="inputs">
+            <div class="landing-inputs">
               <button class="button" type="submit">Submit</button>
             </div>
           </form>
@@ -67,10 +67,33 @@
         </div>
       </div>
       <div data-view="edit-page" class="hidden">
-        <div class="edit-page">
-          <button class="button buttonpos1">Save &amp; Re-generate</button>
-          <button class="button buttonpos2">Discard Changes</button>
-          <button class="button buttonpos3">Delete Entry</button>
+        <div class="edit-page row">
+          <div class="column-half">
+            <div class="image-container">
+              <img
+                class="image"
+                src="https://quickchart.io/chart/render/sf-160f5619-28f5-4c97-8954-196d7603de3d"
+                alt="Los Angeles, CA, United States of America" />
+            </div>
+          </div>
+          <form class="column-half edit-form" name="edit-form" method="post">
+            <!-- <label class="inputs label" for="change-city">
+              Enter a city for a unique climate analysis:
+            </label> -->
+            <input
+              required="true"
+              value="Hello"
+              class="edit-inputs"
+              type="text"
+              id="change-city"
+              name="change-city" />
+
+            <select id="year-select" class="edit-inputs"></select>
+
+            <button type="submit" class="button buttonpos1 green">Save</button>
+            <button class="button buttonpos2 blue">Revert</button>
+            <button class="button buttonpos3">Delete Entry</button>
+          </form>
         </div>
       </div>
       <div data-view="entries-page" class="hidden">

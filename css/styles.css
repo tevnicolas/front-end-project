@@ -75,12 +75,31 @@ header {
   width: 450px;
 }
 
-.inputs {
+.edit-form {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: left;
+  width: 320px;
+  height: 150px;
+}
+
+.landing-inputs {
   display: block;
   margin-left: 50px;
   margin-right: 50px;
   margin-top: 15px;
   flex-basis: 100%;
+}
+
+.edit-inputs {
+  display: block;
+  margin-left: 25px;
+  margin-right: 25px;
+  margin-top: 30px;
+  flex-basis: 100%;
+  font-size: 2em;
+  width: 100%;
 }
 
 .button {
@@ -93,7 +112,8 @@ header {
 }
 
 .form-page,
-.short-row {
+.short-row,
+.edit-page {
   position: relative;
   margin-right: 100px;
   margin-left: 30px;
@@ -148,6 +168,7 @@ header {
   font-size: 12px;
   top: 0;
   right: -100px;
+  cursor: pointer;
 }
 
 .buttonpos2 {
@@ -156,6 +177,7 @@ header {
   font-size: 12px;
   top: 40px;
   right: -100px;
+  cursor: pointer;
 }
 
 .buttonpos3 {
@@ -164,6 +186,17 @@ header {
   font-size: 12px;
   top: 80px;
   right: -100px;
+  cursor: pointer;
+}
+
+.green {
+  background-color: rgb(25, 158, 96);
+  border-color: rgb(25, 158, 96);
+}
+
+.blue {
+  background-color: rgb(97, 97, 221);
+  border-color: rgb(97, 97, 221);
 }
 
 .loading {
@@ -195,6 +228,7 @@ header {
   color: black;
   font-size: 20px;
   justify-content: right;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 767px) {
