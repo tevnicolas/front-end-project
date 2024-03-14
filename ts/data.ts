@@ -1,16 +1,16 @@
 /* exported data */
-interface EntriesObject {
-  city: string;
+interface Entry {
+  formatLocation: string;
   futureYear: string;
-  resultDescription: string;
-  imageLink: string;
+  analysis: string;
+  imageURL: string;
   entryId: number;
 }
 
 interface Data {
   view: string;
-  entries: EntriesObject[];
-  editing: EntriesObject | null;
+  entries: Entry[];
+  editing: Entry | null;
   nextEntryId: number;
 }
 

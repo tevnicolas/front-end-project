@@ -1,5 +1,5 @@
 interface FormElements extends HTMLFormControlsCollection {
-  city: HTMLInputElement;
+  location: HTMLInputElement;
   futureYear?: HTMLSelectElement;
 }
 
@@ -7,7 +7,7 @@ const currentDate = new Date().getFullYear();
 let dataEntryIDTarget = 0;
 const $landingForm = document.querySelector('.landing-form') as HTMLFormElement;
 const $landingFormElements = $landingForm.elements as FormElements;
-const $editForm = document.querySelector('.edit-form') as HTMLFormElement;
+const $editForm = document.querySelector('#edit-form') as HTMLFormElement;
 const $editFormElements = $editForm.elements as FormElements;
 const $landingPage = document.querySelector(
   'div[data-view="landing-page"]',
@@ -36,6 +36,8 @@ const $editButtonFormPage = document.querySelector('.form-page .buttonpos2');
 const $newEntryButtonEntriesPage = document.querySelector(
   '.entries-page .buttonpos1',
 );
+const $saveButtonEditPage = document.querySelector('.edit-page .buttonpos1');
+const $revertButtonEditPage = document.querySelector('.edit-page .buttonpos2');
 const $noEntries = document.querySelector('.no-entries') as HTMLDivElement;
 const $yearSelect = document.querySelector('#futureYear');
 const $editPageDescription = document.querySelector(
@@ -61,32 +63,66 @@ if (!$newEntryButtonFormPage)
   throw new Error('$newEntryButtonFormPage query failed.');
 if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
+if (!$revertButtonEditPage)
+  throw new Error('$revertButtonEditPage query failed.');
+if (!$saveButtonEditPage) throw new Error('$saveButtonEditPage query failed.');
 if (!$noEntries) throw new Error('$noEntries query failed.');
 if (!$yearSelect) throw new Error('$yearSelect query failed.');
 if (!$editPageDescription)
   throw new Error('$editPageDescription query failed.');
 if (!$editPageImage) throw new Error('$editPageImage query failed.');
 
-$landingForm.addEventListener('submit', async (event: Event) => {
+$landingForm.addEventListener('submit', async (event: Event): Promise<void> => {
   event.preventDefault();
   viewSwap('loading-page');
-  const getRequestArr = await getRequest($landingFormElements.city.value);
-  const entriesObject: EntriesObject = {
-    city: getRequestArr[0],
-    futureYear: '2100',
-    resultDescription: getRequestArr[1],
-    imageLink: getRequestArr[2],
-    entryId: data.nextEntryId,
-  };
+  const entry = await getEntry($landingFormElements.location.value, '2100');
   data.nextEntryId++;
-  data.entries.unshift(entriesObject);
-  const $newRowTreeFormStyle = render(entriesObject, 'long');
+  data.entries.unshift(entry);
+  const $newRowTreeFormStyle = render(entry, 'long');
   $formHook.prepend($newRowTreeFormStyle);
-  const $newRowTreeEntriesStyle = render(entriesObject, 'short');
+  const $newRowTreeEntriesStyle = render(entry, 'short');
   $entriesHook.prepend($newRowTreeEntriesStyle);
   hideEntriesExceptNewIdTarget('last');
   viewSwap('form-page');
   $landingForm.reset();
+});
+
+$editForm.addEventListener('submit', async (event: Event): Promise<void> => {
+  event.preventDefault();
+  if (
+    $editFormElements.location.value === data.editing?.formatLocation &&
+    $editFormElements.futureYear!.value === data.editing.futureYear
+  ) {
+    viewSwap('form-page');
+  } else {
+    viewSwap('loading-page');
+    const entry = await getEntry(
+      $editFormElements.location.value,
+      $editFormElements.futureYear!.value,
+    );
+    entry.entryId = data.editing?.entryId as number;
+    data.editing = entry;
+    for (let i = 0; i < data.entries.length; i++) {
+      if (data.entries[i].entryId === data.editing.entryId) {
+        data.entries[i] = data.editing;
+      }
+    }
+    const $newRowTreeFormStyle = render(entry, 'long');
+    const $oldRowTreeFormStyle = $formHook.querySelector(
+      'div[data-entry-id="' + String(data.editing.entryId) + '"]',
+    );
+    if (!$oldRowTreeFormStyle)
+      throw new Error('$oldRowTreeFormStyle query failed.');
+    $oldRowTreeFormStyle.replaceWith($newRowTreeFormStyle);
+    const $newRowTreeEntriesStyle = render(entry, 'short');
+    const $oldRowTreeEntriesStyle = $entriesHook.querySelector(
+      'div[data-entry-id="' + String(data.editing.entryId) + '"]',
+    );
+    if (!$oldRowTreeEntriesStyle)
+      throw new Error('$oldRowTreeEntriesStyle query failed.');
+    $oldRowTreeEntriesStyle.replaceWith($newRowTreeEntriesStyle);
+    viewSwap('form-page');
+  }
 });
 
 $header.addEventListener('click', (event: Event): void => {
@@ -102,7 +138,7 @@ $header.addEventListener('click', (event: Event): void => {
   }
 });
 
-$formHook.addEventListener('click', (event: Event): void => {
+$formPage.addEventListener('click', (event: Event): void => {
   event.preventDefault();
   const $eventTarget = event.target as HTMLElement;
   switch ($eventTarget) {
@@ -110,6 +146,7 @@ $formHook.addEventListener('click', (event: Event): void => {
       viewSwap('landing-page');
       break;
     case $editButtonFormPage:
+      viewSwap('edit-page');
       fillInEditForm();
       break;
   }
@@ -121,16 +158,15 @@ function fillInEditForm(): void {
       data.editing = entry;
     }
   }
-  $editFormElements.city.value = data.editing?.city as string;
+  $editFormElements.location.value = data.editing?.formatLocation as string;
   $editFormElements.futureYear!.value = data.editing?.futureYear as string;
-  $editPageDescription.innerHTML = data.editing?.resultDescription as string;
-  $editPageImage.setAttribute('src', data.editing?.imageLink as string);
-  viewSwap('edit-page');
-  $editFormElements.city.focus();
-  $editFormElements.city.select();
+  $editPageDescription.innerHTML = data.editing?.analysis as string;
+  $editPageImage.setAttribute('src', data.editing?.imageURL as string);
+  $editFormElements.location.focus();
+  $editFormElements.location.select();
 }
 
-$entriesHook.addEventListener('click', (event: Event): void => {
+$entriesPage.addEventListener('click', (event: Event): void => {
   event.preventDefault();
   const $eventTarget = event.target as HTMLElement;
   const $shortRowTarget = $eventTarget.closest(
@@ -143,7 +179,19 @@ $entriesHook.addEventListener('click', (event: Event): void => {
     hideEntriesExceptNewIdTarget(dataEntryIDTarget);
     viewSwap('form-page');
   } else if ($eventTarget.tagName === 'I') {
+    hideEntriesExceptNewIdTarget(dataEntryIDTarget);
+    viewSwap('edit-page');
     fillInEditForm();
+  }
+});
+
+$editPage.addEventListener('click', (event: Event): void => {
+  const $eventTarget = event.target as HTMLElement;
+  switch ($eventTarget) {
+    case $revertButtonEditPage:
+      event.preventDefault();
+      viewSwap('form-page');
+      break;
   }
 });
 
@@ -160,12 +208,12 @@ document.addEventListener('DOMContentLoaded', (): void => {
     $optionYear.textContent = String(i);
     $yearSelect.appendChild($optionYear);
   }
-  toggleNoEntries(); // not sure if I need this here
+  toggleNoEntries();
   viewSwap(data.view); // not certain why this is here yet
   $landingForm.reset(); // also not 100% if this needs to be here
 });
 
-function render(entry: EntriesObject, option: string): HTMLDivElement {
+function render(entry: Entry, option: string): HTMLDivElement {
   const rowType = option === 'short' ? 'short-row' : 'row';
   const pType = option === 'short' ? 'short-paragraph' : '';
   const pointer = option === 'short' ? 'pointer' : '';
@@ -179,22 +227,22 @@ function render(entry: EntriesObject, option: string): HTMLDivElement {
   $divImageContainer.setAttribute('class', 'image-container');
   const $image = document.createElement('img');
   $image.setAttribute('class', 'image');
-  $image.setAttribute('src', entry.imageLink);
-  $image.setAttribute('alt', entry.city);
+  $image.setAttribute('src', entry.imageURL);
+  $image.setAttribute('alt', entry.formatLocation);
   const $divColHalf2 = document.createElement('div');
   $divColHalf2.setAttribute('class', 'column-half');
   const $divTextual = document.createElement('div');
   $divTextual.setAttribute('class', 'textual');
-  const $cityHeading = document.createElement('h1');
-  $cityHeading.setAttribute('class', pointer);
-  $cityHeading.textContent = entry.city;
+  const $locationHeading = document.createElement('h1');
+  $locationHeading.setAttribute('class', pointer);
+  $locationHeading.textContent = entry.formatLocation;
   const $description = document.createElement('p');
   $description.setAttribute('class', pType);
-  $description.innerHTML = entry.resultDescription;
+  $description.innerHTML = entry.analysis;
   const $editIcon = document.createElement('i');
   $editIcon.setAttribute('class', 'fa fa-edit');
 
-  $divTextual.appendChild($cityHeading);
+  $divTextual.appendChild($locationHeading);
   $divTextual.appendChild($description);
   if (option === 'short') {
     const $iconContainer = document.createElement('div');
@@ -240,9 +288,9 @@ function toggleNoEntries(): void {
   }
 }
 
-async function getCoordinatesAndFormatName(
+async function getCoordsAndFormatLocation(
   locationEntry: string,
-): Promise<(number | string)[]> {
+): Promise<{ lat: number; long: number; formatLocation: string }> {
   try {
     const locationArr = locationEntry.split(' ');
     let location = '';
@@ -255,17 +303,17 @@ async function getCoordinatesAndFormatName(
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
-    const properLocationName: string = result.features[0].properties.formatted;
-    const coordinatesArr: number[] = result.features[0].geometry.coordinates;
-    return [...coordinatesArr, properLocationName];
+    const formatLocation: string = result.features[0].properties.formatted;
+    const coordsArr: number[] = result.features[0].geometry.coordinates;
+    return { lat: coordsArr[1], long: coordsArr[0], formatLocation };
   } catch (error) {
-    console.log('Throw getCoordinates() Error', error);
+    console.log('Throw getCoords() Error', error);
     throw error;
   }
 }
 
 interface Temps {
-  formattedLocationName: string;
+  formatLocationName: string;
   meanOfHighTempsCurrentYear: string;
   highestTempOfCurrentYear: string;
   totalPrecipitationCurrentYear: string;
@@ -275,17 +323,20 @@ interface Temps {
   totalPrecipitationFutureYear: string;
 }
 
-async function getClimateDetails(
-  coordsAndProperName: (number | string)[],
+async function getClimateData(
+  coordsAndFormatLocation: {
+    lat: number;
+    long: number;
+    formatLocation: string;
+  },
   futureYear: string,
 ): Promise<Temps> {
   try {
-    const lat = coordsAndProperName[1];
-    const long = coordsAndProperName[0];
     // Encode the target URL with the appropriate route, parameters, and model
     const targetUrl = encodeURIComponent(
       `http://repicea.dynu.net/biosim/BioSimWeather?lat=` +
-        `${lat}&long=${long}&from=${currentDate}&to=2100&model=Climatic` +
+        `${coordsAndFormatLocation.lat}&long=${coordsAndFormatLocation.long}` +
+        `&from=${currentDate}&to=2100&model=Climatic` +
         `_Annual&rcp=8_5&climMod=GCM4&format=json`,
     );
     // Fetch the data 10 times using a CORS proxy to avoid cross-origin issues
@@ -325,8 +376,8 @@ async function getClimateDetails(
       totalPrcpFuture += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
 
-    const averagedResultObj: Temps = {
-      formattedLocationName: coordsAndProperName[2] as string,
+    const climateData: Temps = {
+      formatLocationName: coordsAndFormatLocation.formatLocation as string,
       meanOfHighTempsCurrentYear:
         (meanHighCurr / results.length).toFixed() + '°F',
       highestTempOfCurrentYear: (highestCurr / results.length).toFixed() + '°F',
@@ -341,9 +392,9 @@ async function getClimateDetails(
         (totalPrcpFuture / results.length).toFixed() + 'mm',
     };
 
-    return averagedResultObj;
+    return climateData;
   } catch (error) {
-    console.log('Throw getClimateDetails Error', error);
+    console.log('Throw getClimateData Error', error);
     throw error;
   }
 }
@@ -355,20 +406,20 @@ function getRandomColor(): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-async function fetchChartUrl(object: Temps): Promise<string> {
+async function getChartUrl(climateData: Temps): Promise<string> {
   try {
     const chartConfig = {
       type: 'bar',
       data: {
-        labels: [currentDate, object.futureYear],
+        labels: [currentDate, climateData.futureYear],
         datasets: [
           {
             type: 'bar',
             label: 'Mean High Temps (°F)',
             backgroundColor: getRandomColor(),
             data: [
-              Number(object.meanOfHighTempsCurrentYear.replace(/°F/g, '')),
-              Number(object.meanOfHighTempsFutureYear.replace(/°F/g, '')),
+              Number(climateData.meanOfHighTempsCurrentYear.replace(/°F/g, '')),
+              Number(climateData.meanOfHighTempsFutureYear.replace(/°F/g, '')),
             ],
             yAxisID: 'Temperature',
             barPercentage: 0.9,
@@ -379,8 +430,8 @@ async function fetchChartUrl(object: Temps): Promise<string> {
             label: 'Highest Temp (°F)',
             backgroundColor: getRandomColor(),
             data: [
-              Number(object.highestTempOfCurrentYear.replace(/°F/g, '')),
-              Number(object.highestTempOfFutureYear.replace(/°F/g, '')),
+              Number(climateData.highestTempOfCurrentYear.replace(/°F/g, '')),
+              Number(climateData.highestTempOfFutureYear.replace(/°F/g, '')),
             ],
             yAxisID: 'Temperature',
             barPercentage: 0.9,
@@ -393,8 +444,12 @@ async function fetchChartUrl(object: Temps): Promise<string> {
             borderWidth: 10,
             fill: false,
             data: [
-              Number(object.totalPrecipitationCurrentYear.replace(/mm/g, '')),
-              Number(object.totalPrecipitationFutureYear.replace(/mm/g, '')),
+              Number(
+                climateData.totalPrecipitationCurrentYear.replace(/mm/g, ''),
+              ),
+              Number(
+                climateData.totalPrecipitationFutureYear.replace(/mm/g, ''),
+              ),
             ],
             yAxisID: 'Precipitation',
             order: -1,
@@ -405,7 +460,7 @@ async function fetchChartUrl(object: Temps): Promise<string> {
         responsive: true,
         title: {
           display: true,
-          text: `Climate Change Indicators for ${object.formattedLocationName}`,
+          text: `Climate Change Indicators for ${climateData.formatLocationName}`,
           fontSize: 28,
         },
         legend: {
@@ -495,58 +550,67 @@ async function fetchChartUrl(object: Temps): Promise<string> {
   }
 }
 
-async function getRequest(
-  locationEntry: string,
-  yearEntry = '2100',
-): Promise<string[]> {
-  const coordsAndNameArr = await getCoordinatesAndFormatName(locationEntry);
-  const climateDataObj = await getClimateDetails(coordsAndNameArr, yearEntry);
-
-  const analysis = `Mean of High Temps of ${currentDate}:
-  ${climateDataObj.meanOfHighTempsCurrentYear}<br><br>
-  Mean of High Temps of ${climateDataObj.futureYear}:
-  ${climateDataObj.meanOfHighTempsFutureYear}<br><br>
+function getAnalysis(climateData: Temps): string {
+  return `Mean of High Temps of ${currentDate}:
+  ${climateData.meanOfHighTempsCurrentYear}<br><br>
+  Mean of High Temps of ${climateData.futureYear}:
+  ${climateData.meanOfHighTempsFutureYear}<br><br>
   Percent Change:
   ${
     (
-      ((Number(climateDataObj.meanOfHighTempsFutureYear.replace(/°F/g, '')) -
-        Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) /
-        Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) *
+      ((Number(climateData.meanOfHighTempsFutureYear.replace(/°F/g, '')) -
+        Number(climateData.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) /
+        Number(climateData.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) *
       100
     ).toFixed(2) + '%'
   }<br><br>
   Highest Temp of ${currentDate}:
-  ${climateDataObj.highestTempOfCurrentYear}<br><br>
-  Highest Temp of ${climateDataObj.futureYear}:
-  ${climateDataObj.highestTempOfFutureYear}<br><br>
+  ${climateData.highestTempOfCurrentYear}<br><br>
+  Highest Temp of ${climateData.futureYear}:
+  ${climateData.highestTempOfFutureYear}<br><br>
   Percent Change:
   ${
     (
-      ((Number(climateDataObj.highestTempOfFutureYear.replace(/°F/g, '')) -
-        Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) /
-        Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) *
+      ((Number(climateData.highestTempOfFutureYear.replace(/°F/g, '')) -
+        Number(climateData.highestTempOfCurrentYear.replace(/°F/g, ''))) /
+        Number(climateData.highestTempOfCurrentYear.replace(/°F/g, ''))) *
       100
     ).toFixed(2) + '%'
   }<br><br>
   Total Precipitation in ${currentDate}:
-  ${climateDataObj.totalPrecipitationCurrentYear}<br><br>
-  Total Precipitation in ${climateDataObj.futureYear}:
-  ${climateDataObj.totalPrecipitationFutureYear}<br><br>
+  ${climateData.totalPrecipitationCurrentYear}<br><br>
+  Total Precipitation in ${climateData.futureYear}:
+  ${climateData.totalPrecipitationFutureYear}<br><br>
   Percent Change: ${
     (
-      ((Number(climateDataObj.totalPrecipitationFutureYear.replace(/mm/g, '')) -
-        Number(
-          climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''),
-        )) /
-        Number(
-          climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''),
-        )) *
+      ((Number(climateData.totalPrecipitationFutureYear.replace(/mm/g, '')) -
+        Number(climateData.totalPrecipitationCurrentYear.replace(/mm/g, ''))) /
+        Number(climateData.totalPrecipitationCurrentYear.replace(/mm/g, ''))) *
       100
     ).toFixed(2) + '%'
   }`;
+}
 
-  const chartImgURL = await fetchChartUrl(climateDataObj);
-  return [climateDataObj.formattedLocationName, analysis, chartImgURL];
+async function getEntry(
+  locationEntry: string,
+  futureYearEntry: string,
+): Promise<Entry> {
+  const coordsAndFormatLocation =
+    await getCoordsAndFormatLocation(locationEntry);
+  const climateData = await getClimateData(
+    coordsAndFormatLocation,
+    futureYearEntry,
+  );
+  const analysis = getAnalysis(climateData);
+  const imageURL = await getChartUrl(climateData);
+
+  return {
+    formatLocation: climateData.formatLocationName,
+    futureYear: futureYearEntry,
+    analysis,
+    imageURL,
+    entryId: data.nextEntryId,
+  };
 }
 
 function viewSwap(view: string): void {

@@ -39,15 +39,15 @@
             class="column-full landing-form"
             name="landing-form"
             method="post">
-            <label class="landing-inputs label" for="city">
+            <label class="landing-inputs label" for="location">
               Enter a city for a unique climate analysis:
             </label>
             <input
-              required="true"
+              required
               class="landing-inputs"
               type="text"
-              id="city"
-              name="city" />
+              id="location"
+              name="location" />
             <div class="landing-inputs">
               <button class="button" type="submit">Submit</button>
             </div>
@@ -83,14 +83,16 @@
                 class="edit-form"
                 name="edit-form"
                 method="post">
-                <label class="edit-form-label" for="city">Change City:</label>
+                <label class="edit-form-label" for="location"
+                  >Change location:</label
+                >
                 <input
-                  required="true"
+                  required
                   value=""
                   class="edit-input"
                   type="text"
-                  id="change-city"
-                  name="city" />
+                  id="change-location"
+                  name="location" />
                 <div class="flex-select">
                   <label class="edit-form-label" for="futureYear">
                     Change Future Year:
