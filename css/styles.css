@@ -57,9 +57,7 @@ header {
   color: red;
   font-size: 1.5em;
   font-family: 'Rhodium_libre', sans-serif;
-  padding-right: 30px;
-  padding-left: 30px;
-  padding-top: 30px;
+  padding: 30px 30px 0;
 }
 
 .landing-page-row {
@@ -77,17 +75,12 @@ header {
 
 .landing-inputs {
   display: block;
-  margin-left: 50px;
-  margin-right: 50px;
-  margin-top: 15px;
+  margin: 15px 50px 0;
   flex-basis: 100%;
 }
 
 .edit-form {
-  margin-top: 4px;
-  margin-bottom: 20px;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin: 4px 20px 20px;
 }
 
 .flex-select {
@@ -96,10 +89,7 @@ header {
 
 .edit-input {
   display: block;
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin: 5px 0;
   font-size: 2em;
   width: 100%;
 }
@@ -132,10 +122,7 @@ header {
 .short-row,
 .edit-page {
   position: relative;
-  margin-right: 100px;
-  margin-left: 30px;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin: 30px 100px 30px 30px;
   box-shadow:
     0 -25px 20px -20px rgba(0, 0, 0, 0.3),
     25px 0 20px -20px rgba(0, 0, 0, 0.3),
@@ -145,9 +132,7 @@ header {
 
 .entries-page {
   position: relative;
-  margin-right: 100px;
-  margin-left: 30px;
-  margin-top: 30px;
+  margin: 30px 100px 0 30px;
 }
 
 .short-row {
@@ -171,7 +156,6 @@ header {
 }
 
 .short-row h1 {
-  display: block;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -224,7 +208,6 @@ header {
 }
 
 .short-paragraph {
-  display: block;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -255,8 +238,7 @@ header {
   .short-row {
     width: 100%;
     max-width: 100%;
-    margin: 0 auto;
-    margin-top: 60px;
+    margin: 60px auto 0;
   }
 
   .image {
