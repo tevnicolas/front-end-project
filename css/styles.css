@@ -231,6 +231,24 @@ header {
   cursor: pointer;
 }
 
+#delete-modal {
+  border-color: red;
+  border-radius: 10px;
+  color: black;
+}
+
+.cancel-confirm {
+  display: flex;
+  justify-content: space-around;
+}
+
+.modal-buttons {
+  background-color: red;
+  color: white;
+  border-radius: 4px;
+  border-color: red;
+}
+
 @media screen and (max-width: 767px) {
   .form-page,
   .entries-page,

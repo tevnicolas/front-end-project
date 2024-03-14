@@ -24,10 +24,14 @@ const $newEntryButtonEntriesPage = document.querySelector(
 );
 const $saveButtonEditPage = document.querySelector('.edit-page .buttonpos1');
 const $revertButtonEditPage = document.querySelector('.edit-page .buttonpos2');
+const $deleteButtonEditPage = document.querySelector('.edit-page .buttonpos3');
+const $cancelButtonModal = document.querySelector('#cancel');
+const $confirmButtonModal = document.querySelector('#confirm');
 const $noEntries = document.querySelector('.no-entries');
 const $yearSelect = document.querySelector('#futureYear');
 const $editPageDescription = document.querySelector('#edit-form p');
 const $editPageImage = document.querySelector('.edit-page img');
+const $modal = document.querySelector('#delete-modal');
 if (!$landingForm) throw new Error('$landingform query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$editForm) throw new Error('$editform query failed.');
@@ -46,12 +50,17 @@ if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
 if (!$revertButtonEditPage)
   throw new Error('$revertButtonEditPage query failed.');
+if (!$deleteButtonEditPage)
+  throw new Error('$deleteButtonEditPage query failed.');
 if (!$saveButtonEditPage) throw new Error('$saveButtonEditPage query failed.');
+if (!$cancelButtonModal) throw new Error('$cancelButtonModal query failed.');
+if (!$confirmButtonModal) throw new Error('$confirmButtonModal query failed.');
 if (!$noEntries) throw new Error('$noEntries query failed.');
 if (!$yearSelect) throw new Error('$yearSelect query failed.');
 if (!$editPageDescription)
   throw new Error('$editPageDescription query failed.');
 if (!$editPageImage) throw new Error('$editPageImage query failed.');
+if (!$modal) throw new Error('$modal query failed.');
 $landingForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
@@ -125,6 +134,8 @@ $formPage.addEventListener('click', (event) => {
     case $editButtonFormPage:
       viewSwap('edit-page');
       fillInEditForm();
+      console.log(dataEntryIDTarget);
+      console.log(data.entries);
       break;
   }
 });
@@ -163,6 +174,32 @@ $editPage.addEventListener('click', (event) => {
     case $revertButtonEditPage:
       event.preventDefault();
       viewSwap('form-page');
+      break;
+    case $deleteButtonEditPage:
+      event.preventDefault();
+      $modal.showModal();
+      break;
+    case $cancelButtonModal:
+      event.preventDefault();
+      $modal.close();
+      break;
+    case $confirmButtonModal:
+      event.preventDefault();
+      const $shortRowTarget = $entriesHook.querySelector(
+        'div[data-entry-id="' + String(data.editing?.entryId) + '"]',
+      );
+      const $rowTarget = $formHook.querySelector(
+        'div[data-entry-id="' + String(data.editing?.entryId) + '"]',
+      );
+      $shortRowTarget?.remove();
+      $rowTarget?.remove();
+      for (let i = 0; i < data.entries.length; i++) {
+        if (data.entries[i].entryId === data.editing?.entryId) {
+          data.entries.splice(i, 1);
+        }
+      }
+      $modal.close();
+      viewSwap('entries-page');
       break;
   }
 });
@@ -228,7 +265,7 @@ function render(entry, option) {
 function hideEntriesExceptNewIdTarget(option) {
   const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
   if (option === 'last') {
-    dataEntryIDTarget = $listOfFormEntries.length;
+    $listOfFormEntries.length;
   } else {
     dataEntryIDTarget = option;
   }
