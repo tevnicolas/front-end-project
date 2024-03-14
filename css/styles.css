@@ -253,7 +253,7 @@ header {
 
 .form-page p,
 .edit-form p {
-  margin-bottom: 40px;
+  margin-bottom: 35px;
 }
 
 @media screen and (max-width: 767px) {
