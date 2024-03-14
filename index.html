@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AJAX Project</title>
     <link rel="icon" href="images/favicon.ico" />
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/styles.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <header>
@@ -39,16 +39,16 @@
             class="column-full landing-form"
             name="landing-form"
             method="post">
-            <label class="inputs label" for="city">
+            <label class="landing-inputs label" for="location">
               Enter a city for a unique climate analysis:
             </label>
             <input
-              required="true"
-              class="inputs"
+              required
+              class="landing-inputs"
               type="text"
-              id="city"
-              name="city" />
-            <div class="inputs">
+              id="location"
+              name="location" />
+            <div class="landing-inputs">
               <button class="button" type="submit">Submit</button>
             </div>
           </form>
@@ -64,6 +64,53 @@
           <button class="button buttonpos1">New Entry</button>
           <button class="button buttonpos2">Edit City/Year</button>
           <button class="button buttonpos3">Delete Entry</button>
+        </div>
+      </div>
+      <div data-view="edit-page" class="hidden">
+        <div class="edit-page">
+          <div class="row">
+            <div class="column-half">
+              <div class="image-container">
+                <img
+                  class="image"
+                  src=""
+                  alt="Los Angeles, CA, United States of America" />
+              </div>
+            </div>
+            <div class="column-half">
+              <form
+                id="edit-form"
+                class="edit-form"
+                name="edit-form"
+                method="post">
+                <label class="edit-form-label" for="location"
+                  >Change location:</label
+                >
+                <input
+                  required
+                  value=""
+                  class="edit-input"
+                  type="text"
+                  id="change-location"
+                  name="location" />
+                <div class="flex-select">
+                  <label class="edit-form-label" for="futureYear">
+                    Change Future Year:
+                  </label>
+                  <select
+                    id="futureYear"
+                    class="edit-select"
+                    name="futureYear"></select>
+                </div>
+                <p></p>
+                <button type="submit" class="button buttonpos1 green">
+                  Save
+                </button>
+                <button class="button buttonpos2 blue">Revert</button>
+                <button class="button buttonpos3">Delete Entry</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
       <div data-view="entries-page" class="hidden">

@@ -1,11 +1,15 @@
 'use strict';
 const currentDate = new Date().getFullYear();
-const $form = document.querySelector('.landing-form');
-const $landingFormElements = $form.elements;
+let dataEntryIDTarget = 0;
+const $landingForm = document.querySelector('.landing-form');
+const $landingFormElements = $landingForm.elements;
+const $editForm = document.querySelector('#edit-form');
+const $editFormElements = $editForm.elements;
 const $landingPage = document.querySelector('div[data-view="landing-page"]');
 const $formPage = document.querySelector('div[data-view="form-page"]');
 const $entriesPage = document.querySelector('div[data-view="entries-page"]');
 const $loadingPage = document.querySelector('div[data-view="loading-page"]');
+const $editPage = document.querySelector('div[data-view="edit-page"]');
 const $formHook = document.querySelector('.form-page');
 const $entriesHook = document.querySelector('.entries-page');
 const $header = document.querySelector('#header');
@@ -14,15 +18,23 @@ const $entriesText = document.querySelector('#entries-text');
 const $newEntryButtonFormPage = document.querySelector(
   '.form-page .buttonpos1',
 );
+const $editButtonFormPage = document.querySelector('.form-page .buttonpos2');
 const $newEntryButtonEntriesPage = document.querySelector(
   '.entries-page .buttonpos1',
 );
+const $saveButtonEditPage = document.querySelector('.edit-page .buttonpos1');
+const $revertButtonEditPage = document.querySelector('.edit-page .buttonpos2');
 const $noEntries = document.querySelector('.no-entries');
-if (!$form) throw new Error('$form query failed.');
+const $yearSelect = document.querySelector('#futureYear');
+const $editPageDescription = document.querySelector('#edit-form p');
+const $editPageImage = document.querySelector('.edit-page img');
+if (!$landingForm) throw new Error('$landingform query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
+if (!$editForm) throw new Error('$editform query failed.');
 if (!$formPage) throw new Error('$formPage query failed.');
 if (!$entriesPage) throw new Error('$entriesPage query failed.');
 if (!$loadingPage) throw new Error('$loadingPage query failed.');
+if (!$editPage) throw new Error('$editPage query failed.');
 if (!$formHook) throw new Error('$formHook query failed.');
 if (!$entriesHook) throw new Error('$entriesHook query failed.');
 if (!$header) throw new Error('$header query failed.');
@@ -32,27 +44,64 @@ if (!$newEntryButtonFormPage)
   throw new Error('$newEntryButtonFormPage query failed.');
 if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
+if (!$revertButtonEditPage)
+  throw new Error('$revertButtonEditPage query failed.');
+if (!$saveButtonEditPage) throw new Error('$saveButtonEditPage query failed.');
 if (!$noEntries) throw new Error('$noEntries query failed.');
-$form.addEventListener('submit', async (event) => {
+if (!$yearSelect) throw new Error('$yearSelect query failed.');
+if (!$editPageDescription)
+  throw new Error('$editPageDescription query failed.');
+if (!$editPageImage) throw new Error('$editPageImage query failed.');
+$landingForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
-  const getRequestArr = await getRequest($landingFormElements.city.value);
-  const entriesObject = {
-    title: getRequestArr[0],
-    year: '2100',
-    resultDescription: getRequestArr[1],
-    imageLink: getRequestArr[2],
-    entryId: data.nextEntryId,
-  };
+  const entry = await getEntry($landingFormElements.location.value, '2100');
   data.nextEntryId++;
-  data.entries.unshift(entriesObject);
-  const $newRowTreeFormStyle = render(entriesObject, 'long');
+  data.entries.unshift(entry);
+  const $newRowTreeFormStyle = render(entry, 'long');
   $formHook.prepend($newRowTreeFormStyle);
-  const $newRowTreeEntriesStyle = render(entriesObject, 'short');
+  const $newRowTreeEntriesStyle = render(entry, 'short');
   $entriesHook.prepend($newRowTreeEntriesStyle);
-  hideOtherEntriesExcept('last');
+  hideEntriesExceptNewIdTarget('last');
   viewSwap('form-page');
-  $form.reset();
+  $landingForm.reset();
+});
+$editForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (
+    $editFormElements.location.value === data.editing?.formatLocation &&
+    $editFormElements.futureYear.value === data.editing.futureYear
+  ) {
+    viewSwap('form-page');
+  } else {
+    viewSwap('loading-page');
+    const entry = await getEntry(
+      $editFormElements.location.value,
+      $editFormElements.futureYear.value,
+    );
+    entry.entryId = data.editing?.entryId;
+    data.editing = entry;
+    for (let i = 0; i < data.entries.length; i++) {
+      if (data.entries[i].entryId === data.editing.entryId) {
+        data.entries[i] = data.editing;
+      }
+    }
+    const $newRowTreeFormStyle = render(entry, 'long');
+    const $oldRowTreeFormStyle = $formHook.querySelector(
+      'div[data-entry-id="' + String(data.editing.entryId) + '"]',
+    );
+    if (!$oldRowTreeFormStyle)
+      throw new Error('$oldRowTreeFormStyle query failed.');
+    $oldRowTreeFormStyle.replaceWith($newRowTreeFormStyle);
+    const $newRowTreeEntriesStyle = render(entry, 'short');
+    const $oldRowTreeEntriesStyle = $entriesHook.querySelector(
+      'div[data-entry-id="' + String(data.editing.entryId) + '"]',
+    );
+    if (!$oldRowTreeEntriesStyle)
+      throw new Error('$oldRowTreeEntriesStyle query failed.');
+    $oldRowTreeEntriesStyle.replaceWith($newRowTreeEntriesStyle);
+    viewSwap('form-page');
+  }
 });
 $header.addEventListener('click', (event) => {
   event.preventDefault();
@@ -66,27 +115,55 @@ $header.addEventListener('click', (event) => {
       break;
   }
 });
-$formHook.addEventListener('click', (event) => {
+$formPage.addEventListener('click', (event) => {
   event.preventDefault();
   const $eventTarget = event.target;
   switch ($eventTarget) {
     case $newEntryButtonFormPage:
       viewSwap('landing-page');
       break;
+    case $editButtonFormPage:
+      viewSwap('edit-page');
+      fillInEditForm();
+      break;
   }
 });
-$entriesHook.addEventListener('click', (event) => {
+function fillInEditForm() {
+  for (const entry of data.entries) {
+    if (dataEntryIDTarget === entry.entryId) {
+      data.editing = entry;
+    }
+  }
+  $editFormElements.location.value = data.editing?.formatLocation;
+  $editFormElements.futureYear.value = data.editing?.futureYear;
+  $editPageDescription.innerHTML = data.editing?.analysis;
+  $editPageImage.setAttribute('src', data.editing?.imageURL);
+  $editFormElements.location.focus();
+  $editFormElements.location.select();
+}
+$entriesPage.addEventListener('click', (event) => {
   event.preventDefault();
   const $eventTarget = event.target;
+  const $shortRowTarget = $eventTarget.closest('[data-entry-id]');
+  dataEntryIDTarget = Number($shortRowTarget?.getAttribute('data-entry-id'));
   if ($eventTarget === $newEntryButtonEntriesPage) {
     viewSwap('landing-page');
   } else if ($eventTarget.tagName === 'H1') {
-    const $shortRowTarget = $eventTarget.closest('[data-entry-id]');
-    const dataEntryIDTarget = Number(
-      $shortRowTarget.getAttribute('data-entry-id'),
-    );
-    hideOtherEntriesExcept(dataEntryIDTarget);
+    hideEntriesExceptNewIdTarget(dataEntryIDTarget);
     viewSwap('form-page');
+  } else if ($eventTarget.tagName === 'I') {
+    hideEntriesExceptNewIdTarget(dataEntryIDTarget);
+    viewSwap('edit-page');
+    fillInEditForm();
+  }
+});
+$editPage.addEventListener('click', (event) => {
+  const $eventTarget = event.target;
+  switch ($eventTarget) {
+    case $revertButtonEditPage:
+      event.preventDefault();
+      viewSwap('form-page');
+      break;
   }
 });
 document.addEventListener('DOMContentLoaded', () => {
@@ -96,9 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
     $formHook.appendChild($newRowTreeFormStyle);
     $entriesHook.appendChild($newRowTreeEntriesStyle);
   }
-  toggleNoEntries(); // not sure if I need this here
+  for (let i = 2100; i >= currentDate; i--) {
+    const $optionYear = document.createElement('option');
+    $optionYear.setAttribute('value', String(i));
+    $optionYear.textContent = String(i);
+    $yearSelect.appendChild($optionYear);
+  }
+  toggleNoEntries();
   viewSwap(data.view); // not certain why this is here yet
-  $form.reset(); // also not 100% if this needs to be here
+  $landingForm.reset(); // also not 100% if this needs to be here
 });
 function render(entry, option) {
   const rowType = option === 'short' ? 'short-row' : 'row';
@@ -113,20 +196,28 @@ function render(entry, option) {
   $divImageContainer.setAttribute('class', 'image-container');
   const $image = document.createElement('img');
   $image.setAttribute('class', 'image');
-  $image.setAttribute('src', entry.imageLink);
-  $image.setAttribute('alt', entry.title);
+  $image.setAttribute('src', entry.imageURL);
+  $image.setAttribute('alt', entry.formatLocation);
   const $divColHalf2 = document.createElement('div');
   $divColHalf2.setAttribute('class', 'column-half');
   const $divTextual = document.createElement('div');
   $divTextual.setAttribute('class', 'textual');
-  const $cityHeading = document.createElement('h1');
-  $cityHeading.setAttribute('class', pointer);
-  $cityHeading.textContent = entry.title;
+  const $locationHeading = document.createElement('h1');
+  $locationHeading.setAttribute('class', pointer);
+  $locationHeading.textContent = entry.formatLocation;
   const $description = document.createElement('p');
   $description.setAttribute('class', pType);
-  $description.innerHTML = entry.resultDescription;
-  $divTextual.appendChild($cityHeading);
+  $description.innerHTML = entry.analysis;
+  const $editIcon = document.createElement('i');
+  $editIcon.setAttribute('class', 'fa fa-edit');
+  $divTextual.appendChild($locationHeading);
   $divTextual.appendChild($description);
+  if (option === 'short') {
+    const $iconContainer = document.createElement('div');
+    $iconContainer.setAttribute('class', 'edit-icon');
+    $iconContainer.appendChild($editIcon);
+    $divTextual.appendChild($iconContainer);
+  }
   $divColHalf2.appendChild($divTextual);
   $divImageContainer.appendChild($image);
   $divColHalf.appendChild($divImageContainer);
@@ -134,19 +225,18 @@ function render(entry, option) {
   $divRow.appendChild($divColHalf2);
   return $divRow;
 }
-function hideOtherEntriesExcept(option) {
-  let entryNum = 0;
+function hideEntriesExceptNewIdTarget(option) {
   const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
   if (option === 'last') {
-    entryNum = $listOfFormEntries.length;
+    dataEntryIDTarget = $listOfFormEntries.length;
   } else {
-    entryNum = option;
+    dataEntryIDTarget = option;
   }
   for (let i = 0; i <= $listOfFormEntries.length; i++) {
     const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
-    if (i !== entryNum) {
+    if (i !== dataEntryIDTarget) {
       $hideOtherEntries?.setAttribute('class', 'row hidden');
     } else {
       $hideOtherEntries?.setAttribute('class', 'row');
@@ -162,7 +252,7 @@ function toggleNoEntries() {
     $noEntries.setAttribute('class', 'column-full no-entries hidden');
   }
 }
-async function getCoordinatesAndFormatName(locationEntry) {
+async function getCoordsAndFormatLocation(locationEntry) {
   try {
     const locationArr = locationEntry.split(' ');
     let location = '';
@@ -175,22 +265,21 @@ async function getCoordinatesAndFormatName(locationEntry) {
     );
     const result = await response.json();
     if (!response.ok) throw new Error('Yikes Error Code: ' + response.status);
-    const properLocationName = result.features[0].properties.formatted;
-    const coordinatesArr = result.features[0].geometry.coordinates;
-    return [...coordinatesArr, properLocationName];
+    const formatLocation = result.features[0].properties.formatted;
+    const coordsArr = result.features[0].geometry.coordinates;
+    return { lat: coordsArr[1], long: coordsArr[0], formatLocation };
   } catch (error) {
-    console.log('Throw getCoordinates() Error', error);
+    console.log('Throw getCoords() Error', error);
     throw error;
   }
 }
-async function getClimateDetails(coordsAndProperName, futureYear) {
+async function getClimateData(coordsAndFormatLocation, futureYear) {
   try {
-    const lat = coordsAndProperName[1];
-    const long = coordsAndProperName[0];
     // Encode the target URL with the appropriate route, parameters, and model
     const targetUrl = encodeURIComponent(
       `http://repicea.dynu.net/biosim/BioSimWeather?lat=` +
-        `${lat}&long=${long}&from=${currentDate}&to=2100&model=Climatic` +
+        `${coordsAndFormatLocation.lat}&long=${coordsAndFormatLocation.long}` +
+        `&from=${currentDate}&to=2100&model=Climatic` +
         `_Annual&rcp=8_5&climMod=GCM4&format=json`,
     );
     // Fetch the data 10 times using a CORS proxy to avoid cross-origin issues
@@ -226,8 +315,8 @@ async function getClimateDetails(coordsAndProperName, futureYear) {
         32;
       totalPrcpFuture += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
     }
-    const averagedResultObj = {
-      formattedLocationName: coordsAndProperName[2],
+    const climateData = {
+      formatLocationName: coordsAndFormatLocation.formatLocation,
       meanOfHighTempsCurrentYear:
         (meanHighCurr / results.length).toFixed() + '°F',
       highestTempOfCurrentYear: (highestCurr / results.length).toFixed() + '°F',
@@ -241,9 +330,9 @@ async function getClimateDetails(coordsAndProperName, futureYear) {
       totalPrecipitationFutureYear:
         (totalPrcpFuture / results.length).toFixed() + 'mm',
     };
-    return averagedResultObj;
+    return climateData;
   } catch (error) {
-    console.log('Throw getClimateDetails Error', error);
+    console.log('Throw getClimateData Error', error);
     throw error;
   }
 }
@@ -253,20 +342,20 @@ function getRandomColor() {
   const b = Math.floor(Math.random() * 256);
   return `rgb(${r}, ${g}, ${b})`;
 }
-async function fetchChartUrl(object) {
+async function getChartUrl(climateData) {
   try {
     const chartConfig = {
       type: 'bar',
       data: {
-        labels: [currentDate, object.futureYear],
+        labels: [currentDate, climateData.futureYear],
         datasets: [
           {
             type: 'bar',
             label: 'Mean High Temps (°F)',
             backgroundColor: getRandomColor(),
             data: [
-              Number(object.meanOfHighTempsCurrentYear.replace(/°F/g, '')),
-              Number(object.meanOfHighTempsFutureYear.replace(/°F/g, '')),
+              Number(climateData.meanOfHighTempsCurrentYear.replace(/°F/g, '')),
+              Number(climateData.meanOfHighTempsFutureYear.replace(/°F/g, '')),
             ],
             yAxisID: 'Temperature',
             barPercentage: 0.9,
@@ -277,8 +366,8 @@ async function fetchChartUrl(object) {
             label: 'Highest Temp (°F)',
             backgroundColor: getRandomColor(),
             data: [
-              Number(object.highestTempOfCurrentYear.replace(/°F/g, '')),
-              Number(object.highestTempOfFutureYear.replace(/°F/g, '')),
+              Number(climateData.highestTempOfCurrentYear.replace(/°F/g, '')),
+              Number(climateData.highestTempOfFutureYear.replace(/°F/g, '')),
             ],
             yAxisID: 'Temperature',
             barPercentage: 0.9,
@@ -291,8 +380,12 @@ async function fetchChartUrl(object) {
             borderWidth: 10,
             fill: false,
             data: [
-              Number(object.totalPrecipitationCurrentYear.replace(/mm/g, '')),
-              Number(object.totalPrecipitationFutureYear.replace(/mm/g, '')),
+              Number(
+                climateData.totalPrecipitationCurrentYear.replace(/mm/g, ''),
+              ),
+              Number(
+                climateData.totalPrecipitationFutureYear.replace(/mm/g, ''),
+              ),
             ],
             yAxisID: 'Precipitation',
             order: -1,
@@ -303,7 +396,7 @@ async function fetchChartUrl(object) {
         responsive: true,
         title: {
           display: true,
-          text: `Climate Change Indicators for ${object.formattedLocationName}`,
+          text: `Climate Change Indicators for ${climateData.formatLocationName}`,
           fontSize: 28,
         },
         legend: {
@@ -388,28 +481,62 @@ async function fetchChartUrl(object) {
     throw error;
   }
 }
-async function getRequest(locationEntry, yearEntry = '2100') {
-  const coordsAndNameArr = await getCoordinatesAndFormatName(locationEntry);
-  const climateDataObj = await getClimateDetails(coordsAndNameArr, yearEntry);
-  const stringOfData = `Mean of High Temps of ${currentDate}: ${climateDataObj.meanOfHighTempsCurrentYear}<br><br>
-
-Mean of High Temps of ${climateDataObj.futureYear}: ${climateDataObj.meanOfHighTempsFutureYear}<br><br>
-
-Percent Increase/Decrease: ${(((Number(climateDataObj.meanOfHighTempsFutureYear.replace(/°F/g, '')) - Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
-
-Highest Temp of ${currentDate}: ${climateDataObj.highestTempOfCurrentYear}<br><br>
-
-Highest Temp of ${climateDataObj.futureYear}: ${climateDataObj.highestTempOfFutureYear}<br><br>
-
-Percent Increase/Decrease: ${(((Number(climateDataObj.highestTempOfFutureYear.replace(/°F/g, '')) - Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) / Number(climateDataObj.highestTempOfCurrentYear.replace(/°F/g, ''))) * 100).toFixed(2) + '%'}<br><br>
-
-Total Precipitation in ${currentDate}: ${climateDataObj.totalPrecipitationCurrentYear}<br><br>
-
-Total Precipitation in ${climateDataObj.futureYear}: ${climateDataObj.totalPrecipitationFutureYear}<br><br>
-
-Percent Increase/Decrease: ${(((Number(climateDataObj.totalPrecipitationFutureYear.replace(/mm/g, '')) - Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) / Number(climateDataObj.totalPrecipitationCurrentYear.replace(/mm/g, ''))) * 100).toFixed(2) + '%'}`;
-  const chartImgURL = await fetchChartUrl(climateDataObj);
-  return [climateDataObj.formattedLocationName, stringOfData, chartImgURL];
+function getAnalysis(climateData) {
+  return `Mean of High Temps of ${currentDate}:
+  ${climateData.meanOfHighTempsCurrentYear}<br><br>
+  Mean of High Temps of ${climateData.futureYear}:
+  ${climateData.meanOfHighTempsFutureYear}<br><br>
+  Percent Change:
+  ${
+    (
+      ((Number(climateData.meanOfHighTempsFutureYear.replace(/°F/g, '')) -
+        Number(climateData.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) /
+        Number(climateData.meanOfHighTempsCurrentYear.replace(/°F/g, ''))) *
+      100
+    ).toFixed(2) + '%'
+  }<br><br>
+  Highest Temp of ${currentDate}:
+  ${climateData.highestTempOfCurrentYear}<br><br>
+  Highest Temp of ${climateData.futureYear}:
+  ${climateData.highestTempOfFutureYear}<br><br>
+  Percent Change:
+  ${
+    (
+      ((Number(climateData.highestTempOfFutureYear.replace(/°F/g, '')) -
+        Number(climateData.highestTempOfCurrentYear.replace(/°F/g, ''))) /
+        Number(climateData.highestTempOfCurrentYear.replace(/°F/g, ''))) *
+      100
+    ).toFixed(2) + '%'
+  }<br><br>
+  Total Precipitation in ${currentDate}:
+  ${climateData.totalPrecipitationCurrentYear}<br><br>
+  Total Precipitation in ${climateData.futureYear}:
+  ${climateData.totalPrecipitationFutureYear}<br><br>
+  Percent Change: ${
+    (
+      ((Number(climateData.totalPrecipitationFutureYear.replace(/mm/g, '')) -
+        Number(climateData.totalPrecipitationCurrentYear.replace(/mm/g, ''))) /
+        Number(climateData.totalPrecipitationCurrentYear.replace(/mm/g, ''))) *
+      100
+    ).toFixed(2) + '%'
+  }`;
+}
+async function getEntry(locationEntry, futureYearEntry) {
+  const coordsAndFormatLocation =
+    await getCoordsAndFormatLocation(locationEntry);
+  const climateData = await getClimateData(
+    coordsAndFormatLocation,
+    futureYearEntry,
+  );
+  const analysis = getAnalysis(climateData);
+  const imageURL = await getChartUrl(climateData);
+  return {
+    formatLocation: climateData.formatLocationName,
+    futureYear: futureYearEntry,
+    analysis,
+    imageURL,
+    entryId: data.nextEntryId,
+  };
 }
 function viewSwap(view) {
   if (view === 'landing-page') {
@@ -417,22 +544,32 @@ function viewSwap(view) {
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
-    $form.reset();
+    $editPage.setAttribute('class', 'hidden');
+    $landingForm.reset();
   } else if (view === 'form-page') {
     $formPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
   } else if (view === 'entries-page') {
     $entriesPage.setAttribute('class', '');
     $formPage.setAttribute('class', 'hidden');
     $landingPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
     toggleNoEntries();
   } else if (view === 'loading-page') {
     $loadingPage.setAttribute('class', '');
     $entriesPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
     $landingPage.setAttribute('class', 'hidden');
+    $editPage.setAttribute('class', 'hidden');
+  } else if (view === 'edit-page') {
+    $editPage.setAttribute('class', '');
+    $landingPage.setAttribute('class', 'hidden');
+    $formPage.setAttribute('class', 'hidden');
+    $entriesPage.setAttribute('class', 'hidden');
+    $loadingPage.setAttribute('class', 'hidden');
   }
 }

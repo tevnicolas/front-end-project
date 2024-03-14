@@ -57,9 +57,7 @@ header {
   color: red;
   font-size: 1.5em;
   font-family: 'Rhodium_libre', sans-serif;
-  padding-right: 30px;
-  padding-left: 30px;
-  padding-top: 30px;
+  padding: 30px 30px 0;
 }
 
 .landing-page-row {
@@ -75,12 +73,40 @@ header {
   width: 450px;
 }
 
-.inputs {
+.landing-inputs {
   display: block;
-  margin-left: 50px;
-  margin-right: 50px;
-  margin-top: 15px;
+  margin: 15px 50px 0;
   flex-basis: 100%;
+}
+
+.edit-form {
+  margin: 4px 20px 20px;
+}
+
+.flex-select {
+  display: flex;
+}
+
+.edit-input {
+  display: block;
+  margin: 5px 0;
+  font-size: 2em;
+  width: 100%;
+}
+
+.edit-select {
+  display: inline;
+  margin-top: 2px;
+  margin-bottom: 5px;
+  width: 100%;
+  font-size: 1.3em;
+  height: 25px;
+}
+
+.edit-form-label {
+  font-size: 14px;
+  margin-top: 6px;
+  min-width: 130px;
 }
 
 .button {
@@ -93,12 +119,10 @@ header {
 }
 
 .form-page,
-.short-row {
+.short-row,
+.edit-page {
   position: relative;
-  margin-right: 100px;
-  margin-left: 30px;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin: 30px 100px 30px 30px;
   box-shadow:
     0 -25px 20px -20px rgba(0, 0, 0, 0.3),
     25px 0 20px -20px rgba(0, 0, 0, 0.3),
@@ -108,9 +132,7 @@ header {
 
 .entries-page {
   position: relative;
-  margin-right: 100px;
-  margin-left: 30px;
-  margin-top: 30px;
+  margin: 30px 100px 0 30px;
 }
 
 .short-row {
@@ -134,7 +156,6 @@ header {
 }
 
 .short-row h1 {
-  display: block;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -148,6 +169,7 @@ header {
   font-size: 12px;
   top: 0;
   right: -100px;
+  cursor: pointer;
 }
 
 .buttonpos2 {
@@ -156,6 +178,7 @@ header {
   font-size: 12px;
   top: 40px;
   right: -100px;
+  cursor: pointer;
 }
 
 .buttonpos3 {
@@ -164,6 +187,17 @@ header {
   font-size: 12px;
   top: 80px;
   right: -100px;
+  cursor: pointer;
+}
+
+.green {
+  background-color: rgb(25, 158, 96);
+  border-color: rgb(25, 158, 96);
+}
+
+.blue {
+  background-color: rgb(97, 97, 221);
+  border-color: rgb(97, 97, 221);
 }
 
 .loading {
@@ -174,12 +208,11 @@ header {
 }
 
 .short-paragraph {
-  display: block;
   /* stylelint-disable-next-line value-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 10; /* Limits the text to 3 lines */
   overflow: hidden;
+  -webkit-line-clamp: 10;
 }
 
 .no-entries {
@@ -190,14 +223,22 @@ header {
   cursor: pointer;
 }
 
+.edit-icon {
+  display: flex;
+  color: black;
+  font-size: 20px;
+  justify-content: right;
+  cursor: pointer;
+}
+
 @media screen and (max-width: 767px) {
   .form-page,
   .entries-page,
+  .edit-page,
   .short-row {
     width: 100%;
     max-width: 100%;
-    margin: 0 auto;
-    margin-top: 60px;
+    margin: 60px auto 0;
   }
 
   .image {
