@@ -134,8 +134,6 @@ $formPage.addEventListener('click', (event) => {
     case $editButtonFormPage:
       viewSwap('edit-page');
       fillInEditForm();
-      console.log(dataEntryIDTarget);
-      console.log(data.entries);
       break;
   }
 });
@@ -183,7 +181,7 @@ $editPage.addEventListener('click', (event) => {
       event.preventDefault();
       $modal.close();
       break;
-    case $confirmButtonModal:
+    case $confirmButtonModal: {
       event.preventDefault();
       const $shortRowTarget = $entriesHook.querySelector(
         'div[data-entry-id="' + String(data.editing?.entryId) + '"]',
@@ -201,6 +199,7 @@ $editPage.addEventListener('click', (event) => {
       $modal.close();
       viewSwap('entries-page');
       break;
+    }
   }
 });
 document.addEventListener('DOMContentLoaded', () => {
@@ -264,12 +263,16 @@ function render(entry, option) {
 }
 function hideEntriesExceptNewIdTarget(option) {
   const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
+  const lastEntryId = Number($listOfFormEntries[0].dataset.entryId);
+  const firstEntryId = Number(
+    $listOfFormEntries[$listOfFormEntries.length - 1].dataset.entryId,
+  );
   if (option === 'last') {
-    $listOfFormEntries.length;
+    dataEntryIDTarget = lastEntryId;
   } else {
     dataEntryIDTarget = option;
   }
-  for (let i = 0; i <= $listOfFormEntries.length; i++) {
+  for (let i = firstEntryId; i <= lastEntryId; i++) {
     const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
@@ -603,10 +606,24 @@ function viewSwap(view) {
     $landingPage.setAttribute('class', 'hidden');
     $editPage.setAttribute('class', 'hidden');
   } else if (view === 'edit-page') {
+    adjustEditFormHeading(); //necessary
     $editPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
   }
+}
+function adjustEditFormHeading() {
+  viewSwap('form-page'); //necessary
+  const $editFormHeading = document.querySelector('.edit-form-heading');
+  const $formPageHeading = $formHook.querySelector(
+    `div[data-entry-id="${dataEntryIDTarget}"] h1`,
+  );
+  console.log($formPageHeading);
+  if (!$editFormHeading) throw new Error('$editFormHeading query failed.');
+  if (!$formPageHeading) throw new Error('$formPageHeading query failed.');
+  const formPageHeadingHeight = $formPageHeading.offsetHeight;
+  console.log(formPageHeadingHeight);
+  $editFormHeading.style.height = String(formPageHeadingHeight + 23) + 'px';
 }

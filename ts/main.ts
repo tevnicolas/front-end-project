@@ -157,8 +157,6 @@ $formPage.addEventListener('click', (event: Event): void => {
     case $editButtonFormPage:
       viewSwap('edit-page');
       fillInEditForm();
-      console.log(dataEntryIDTarget);
-      console.log(data.entries);
       break;
   }
 });
@@ -298,13 +296,19 @@ function render(entry: Entry, option: string): HTMLDivElement {
 }
 
 function hideEntriesExceptNewIdTarget(option: string | number): void {
-  const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
+  const $listOfFormEntries = $formHook.querySelectorAll(
+    '[data-entry-id]',
+  ) as NodeListOf<HTMLElement>;
+  const lastEntryId = Number($listOfFormEntries[0].dataset.entryId);
+  const firstEntryId = Number(
+    $listOfFormEntries[$listOfFormEntries.length - 1].dataset.entryId,
+  );
   if (option === 'last') {
-    dataEntryIDTarget = $listOfFormEntries.length;
+    dataEntryIDTarget = lastEntryId;
   } else {
     dataEntryIDTarget = option as number;
   }
-  for (let i = 0; i <= $listOfFormEntries.length; i++) {
+  for (let i = firstEntryId; i <= lastEntryId; i++) {
     const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
@@ -679,10 +683,27 @@ function viewSwap(view: string): void {
     $landingPage.setAttribute('class', 'hidden');
     $editPage.setAttribute('class', 'hidden');
   } else if (view === 'edit-page') {
+    adjustEditFormHeading(); // necessary
     $editPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
   }
+}
+
+function adjustEditFormHeading(): void {
+  viewSwap('form-page'); // necessary
+  const $editFormHeading = document.querySelector(
+    '.edit-form-heading',
+  ) as HTMLDivElement;
+  const $formPageHeading = $formHook.querySelector(
+    `div[data-entry-id="${dataEntryIDTarget}"] h1`,
+  ) as HTMLHeadingElement;
+  console.log($formPageHeading);
+  if (!$editFormHeading) throw new Error('$editFormHeading query failed.');
+  if (!$formPageHeading) throw new Error('$formPageHeading query failed.');
+  const formPageHeadingHeight = $formPageHeading.offsetHeight;
+  console.log(formPageHeadingHeight);
+  $editFormHeading.style.height = String(formPageHeadingHeight + 23) + 'px';
 }
