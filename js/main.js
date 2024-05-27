@@ -561,6 +561,26 @@ function getAnalysis(climateData) {
     ).toFixed(2) + '%'
   }`;
 }
+const accessKey = 'YOUR_ACCESS_KEY';
+const searchTerm = 'nature'; // Replace 'nature' with your search term
+async function searchPhotos(string) {
+  try {
+    const response = await fetch(
+      `https://api.unsplash.com/search/photos?query=` +
+        `${encodeURIComponent(string)}&client_id=` +
+        `80V_kPmg_mb2N88uTqhRYTHhyh7Oj2hGN_I9Lcxg5QE`,
+    );
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    const result = await response.json();
+    const photos = result.results;
+    console.log(photos);
+  } catch (error) {
+    console.error('Failed to search for photos:', error);
+  }
+}
+searchPhotos('Anchorage, AK 99501, United States of America skyline');
 async function getEntry(locationEntry, futureYearEntry) {
   const coordsAndFormatLocation =
     await getCoordsAndFormatLocation(locationEntry);
@@ -606,7 +626,7 @@ function viewSwap(view) {
     $landingPage.setAttribute('class', 'hidden');
     $editPage.setAttribute('class', 'hidden');
   } else if (view === 'edit-page') {
-    adjustEditFormHeading(); //necessary
+    adjustEditFormHeading(); // necessary
     $editPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
@@ -615,7 +635,7 @@ function viewSwap(view) {
   }
 }
 function adjustEditFormHeading() {
-  viewSwap('form-page'); //necessary
+  viewSwap('form-page'); // necessary
   const $editFormHeading = document.querySelector('.edit-form-heading');
   const $formPageHeading = $formHook.querySelector(
     `div[data-entry-id="${dataEntryIDTarget}"] h1`,

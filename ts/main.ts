@@ -633,6 +633,29 @@ function getAnalysis(climateData: Temps): string {
   }`;
 }
 
+// const accessKey: string = 'YOUR_ACCESS_KEY';
+// const searchTerm: string = 'nature'; // Replace 'nature' with your search term
+
+async function searchPhotos(string: string): Promise<void> {
+  try {
+    const response = await fetch(
+      `https://api.unsplash.com/search/photos?query=` +
+        `${encodeURIComponent(string)}&client_id=` +
+        `80V_kPmg_mb2N88uTqhRYTHhyh7Oj2hGN_I9Lcxg5QE`,
+    );
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    const result = await response.json();
+    const photos = result.results;
+    console.log(photos);
+  } catch (error) {
+    console.error('Failed to search for photos:', error);
+  }
+}
+
+searchPhotos('Anchorage, AK 99501, United States of America skyline');
+
 async function getEntry(
   locationEntry: string,
   futureYearEntry: string,
