@@ -24,10 +24,14 @@ const $newEntryButtonEntriesPage = document.querySelector(
 );
 const $saveButtonEditPage = document.querySelector('.edit-page .buttonpos1');
 const $revertButtonEditPage = document.querySelector('.edit-page .buttonpos2');
+const $deleteButtonEditPage = document.querySelector('.edit-page .buttonpos3');
+const $cancelButtonModal = document.querySelector('#cancel');
+const $confirmButtonModal = document.querySelector('#confirm');
 const $noEntries = document.querySelector('.no-entries');
 const $yearSelect = document.querySelector('#futureYear');
 const $editPageDescription = document.querySelector('#edit-form p');
 const $editPageImage = document.querySelector('.edit-page img');
+const $modal = document.querySelector('#delete-modal');
 if (!$landingForm) throw new Error('$landingform query failed.');
 if (!$landingPage) throw new Error('$landingPage query failed.');
 if (!$editForm) throw new Error('$editform query failed.');
@@ -46,12 +50,17 @@ if (!$newEntryButtonEntriesPage)
   throw new Error('$newEntryButtonEntriesPage query failed.');
 if (!$revertButtonEditPage)
   throw new Error('$revertButtonEditPage query failed.');
+if (!$deleteButtonEditPage)
+  throw new Error('$deleteButtonEditPage query failed.');
 if (!$saveButtonEditPage) throw new Error('$saveButtonEditPage query failed.');
+if (!$cancelButtonModal) throw new Error('$cancelButtonModal query failed.');
+if (!$confirmButtonModal) throw new Error('$confirmButtonModal query failed.');
 if (!$noEntries) throw new Error('$noEntries query failed.');
 if (!$yearSelect) throw new Error('$yearSelect query failed.');
 if (!$editPageDescription)
   throw new Error('$editPageDescription query failed.');
 if (!$editPageImage) throw new Error('$editPageImage query failed.');
+if (!$modal) throw new Error('$modal query failed.');
 $landingForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   viewSwap('loading-page');
@@ -164,6 +173,33 @@ $editPage.addEventListener('click', (event) => {
       event.preventDefault();
       viewSwap('form-page');
       break;
+    case $deleteButtonEditPage:
+      event.preventDefault();
+      $modal.showModal();
+      break;
+    case $cancelButtonModal:
+      event.preventDefault();
+      $modal.close();
+      break;
+    case $confirmButtonModal: {
+      event.preventDefault();
+      const $shortRowTarget = $entriesHook.querySelector(
+        'div[data-entry-id="' + String(data.editing?.entryId) + '"]',
+      );
+      const $rowTarget = $formHook.querySelector(
+        'div[data-entry-id="' + String(data.editing?.entryId) + '"]',
+      );
+      $shortRowTarget?.remove();
+      $rowTarget?.remove();
+      for (let i = 0; i < data.entries.length; i++) {
+        if (data.entries[i].entryId === data.editing?.entryId) {
+          data.entries.splice(i, 1);
+        }
+      }
+      $modal.close();
+      viewSwap('entries-page');
+      break;
+    }
   }
 });
 document.addEventListener('DOMContentLoaded', () => {
@@ -227,12 +263,16 @@ function render(entry, option) {
 }
 function hideEntriesExceptNewIdTarget(option) {
   const $listOfFormEntries = $formHook.querySelectorAll('[data-entry-id]');
+  const lastEntryId = Number($listOfFormEntries[0].dataset.entryId);
+  const firstEntryId = Number(
+    $listOfFormEntries[$listOfFormEntries.length - 1].dataset.entryId,
+  );
   if (option === 'last') {
-    dataEntryIDTarget = $listOfFormEntries.length;
+    dataEntryIDTarget = lastEntryId;
   } else {
     dataEntryIDTarget = option;
   }
-  for (let i = 0; i <= $listOfFormEntries.length; i++) {
+  for (let i = firstEntryId; i <= lastEntryId; i++) {
     const $hideOtherEntries = $formHook.querySelector(
       `div[data-entry-id="${i}"]`,
     );
@@ -566,10 +606,24 @@ function viewSwap(view) {
     $landingPage.setAttribute('class', 'hidden');
     $editPage.setAttribute('class', 'hidden');
   } else if (view === 'edit-page') {
+    adjustEditFormHeading(); //necessary
     $editPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
     $entriesPage.setAttribute('class', 'hidden');
     $loadingPage.setAttribute('class', 'hidden');
   }
+}
+function adjustEditFormHeading() {
+  viewSwap('form-page'); //necessary
+  const $editFormHeading = document.querySelector('.edit-form-heading');
+  const $formPageHeading = $formHook.querySelector(
+    `div[data-entry-id="${dataEntryIDTarget}"] h1`,
+  );
+  console.log($formPageHeading);
+  if (!$editFormHeading) throw new Error('$editFormHeading query failed.');
+  if (!$formPageHeading) throw new Error('$formPageHeading query failed.');
+  const formPageHeadingHeight = $formPageHeading.offsetHeight;
+  console.log(formPageHeadingHeight);
+  $editFormHeading.style.height = String(formPageHeadingHeight + 23) + 'px';
 }

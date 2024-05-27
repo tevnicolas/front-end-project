@@ -63,7 +63,6 @@
         <div class="form-page">
           <button class="button buttonpos1">New Entry</button>
           <button class="button buttonpos2">Edit City/Year</button>
-          <button class="button buttonpos3">Delete Entry</button>
         </div>
       </div>
       <div data-view="edit-page" class="hidden">
@@ -83,24 +82,26 @@
                 class="edit-form"
                 name="edit-form"
                 method="post">
-                <label class="edit-form-label" for="location"
-                  >Change location:</label
-                >
-                <input
-                  required
-                  value=""
-                  class="edit-input"
-                  type="text"
-                  id="change-location"
-                  name="location" />
-                <div class="flex-select">
-                  <label class="edit-form-label" for="futureYear">
-                    Change Future Year:
+                <div class="edit-form-heading">
+                  <label class="edit-form-label" for="change-location">
+                    Change location:
                   </label>
-                  <select
-                    id="futureYear"
-                    class="edit-select"
-                    name="futureYear"></select>
+                  <input
+                    required
+                    value=""
+                    class="edit-input"
+                    type="text"
+                    id="change-location"
+                    name="location" />
+                  <div class="flex-select">
+                    <label class="edit-form-label" for="futureYear">
+                      Change Future Year:
+                    </label>
+                    <select
+                      id="futureYear"
+                      class="edit-select"
+                      name="futureYear"></select>
+                  </div>
                 </div>
                 <p></p>
                 <button type="submit" class="button buttonpos1 green">
@@ -112,6 +113,21 @@
             </div>
           </div>
         </div>
+        <dialog id="delete-modal">
+          <div class="row">
+            <div>
+              <p>Are you sure you want too delete this entry?</p>
+            </div>
+          </div>
+          <div class="row cancel-confirm">
+            <div>
+              <button id="cancel" class="modal-buttons">Cancel</button>
+            </div>
+            <div>
+              <button id="confirm" class="modal-buttons">Confirm</button>
+            </div>
+          </div>
+        </dialog>
       </div>
       <div data-view="entries-page" class="hidden">
         <div class="entries-page">
