@@ -322,53 +322,42 @@ async function getClimateData(coordsAndFormatLocation, futureYear) {
         `&from=${currentDate}&to=2100&model=Climatic` +
         `_Annual&rcp=8_5&climMod=GCM4&format=json`,
     );
-    // Fetch the data 10 times using a CORS proxy to avoid cross-origin issues
-    const responses = await Promise.all(
-      new Array(11).fill(null).map(async () => {
-        return fetch(`https://lfz-cors.herokuapp.com/?url=${targetUrl}`);
-      }),
+    // Fetch the data once
+    const response = await fetch(
+      `https://lfz-cors.herokuapp.com/?url=${targetUrl}`,
     );
-    const results = await Promise.all(
-      responses.map(async (response) => {
-        if (!response.ok) {
-          throw new Error('Yikes Error Code: ' + response.status);
-        }
-        return response.json();
-      }),
-    );
-    let meanHighCurr = 0;
-    let highestCurr = 0;
-    let totalPrcpCurr = 0;
-    let meanHighFuture = 0;
-    let highestFuture = 0;
-    let totalPrcpFuture = 0;
-    for (let i = 0; i < results.length; i++) {
-      meanHighCurr +=
-        (Number(results[i].Climatic_Annual[0][0][0].MeanTmax) * 9) / 5 + 32;
-      highestCurr +=
-        (Number(results[i].Climatic_Annual[0][0][0].HitghestTmax) * 9) / 5 + 32;
-      totalPrcpCurr += Number(results[i].Climatic_Annual[0][0][0].TotalPrcp);
-      meanHighFuture +=
-        (Number(results[i].Climatic_Annual[0][0][76].MeanTmax) * 9) / 5 + 32;
-      highestFuture +=
-        (Number(results[i].Climatic_Annual[0][0][76].HitghestTmax) * 9) / 5 +
-        32;
-      totalPrcpFuture += Number(results[i].Climatic_Annual[0][0][76].TotalPrcp);
+    if (!response.ok) {
+      throw new Error('Yikes Error Code: ' + response.status);
     }
+    const results = await response.json();
+    // Note: 'Hitghest' spelled incorrectly to match API incorrect spelling
     const climateData = {
       formatLocationName: coordsAndFormatLocation.formatLocation,
       meanOfHighTempsCurrentYear:
-        (meanHighCurr / results.length).toFixed() + '°F',
-      highestTempOfCurrentYear: (highestCurr / results.length).toFixed() + '°F',
+        (
+          (Number(results.Climatic_Annual[0][0][0].MeanTmax) * 9) / 5 +
+          32
+        ).toFixed() + '°F',
+      highestTempOfCurrentYear:
+        (
+          (Number(results.Climatic_Annual[0][0][0].HitghestTmax) * 9) / 5 +
+          32
+        ).toFixed() + '°F',
       totalPrecipitationCurrentYear:
-        (totalPrcpCurr / results.length).toFixed() + 'mm',
+        Number(results.Climatic_Annual[0][0][0].TotalPrcp).toFixed() + 'mm',
       futureYear,
       meanOfHighTempsFutureYear:
-        (meanHighFuture / results.length).toFixed() + '°F',
+        (
+          (Number(results.Climatic_Annual[0][0][76].MeanTmax) * 9) / 5 +
+          32
+        ).toFixed() + '°F',
       highestTempOfFutureYear:
-        (highestFuture / results.length).toFixed() + '°F',
+        (
+          (Number(results.Climatic_Annual[0][0][76].HitghestTmax) * 9) / 5 +
+          32
+        ).toFixed() + '°F',
       totalPrecipitationFutureYear:
-        (totalPrcpFuture / results.length).toFixed() + 'mm',
+        Number(results.Climatic_Annual[0][0][76].TotalPrcp).toFixed() + 'mm',
     };
     return climateData;
   } catch (error) {
@@ -606,7 +595,7 @@ function viewSwap(view) {
     $landingPage.setAttribute('class', 'hidden');
     $editPage.setAttribute('class', 'hidden');
   } else if (view === 'edit-page') {
-    adjustEditFormHeading(); //necessary
+    adjustEditFormHeading(); // necessary
     $editPage.setAttribute('class', '');
     $landingPage.setAttribute('class', 'hidden');
     $formPage.setAttribute('class', 'hidden');
@@ -615,7 +604,7 @@ function viewSwap(view) {
   }
 }
 function adjustEditFormHeading() {
-  viewSwap('form-page'); //necessary
+  viewSwap('form-page'); // necessary
   const $editFormHeading = document.querySelector('.edit-form-heading');
   const $formPageHeading = $formHook.querySelector(
     `div[data-entry-id="${dataEntryIDTarget}"] h1`,
