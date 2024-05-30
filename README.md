@@ -1,5 +1,10 @@
 # Your-Climate-Future
 
+![License](https://img.shields.io/github/license/tevnicolas/your-climate-future)
+![Issues](https://img.shields.io/github/issues/tevnicolas/your-climate-future)
+![Stars](https://img.shields.io/github/stars/tevnicolas/your-climate-future)
+![Forks](https://img.shields.io/github/forks/tevnicolas/your-climate-future)
+
 ## Table of Contents
 
 - [Description](#description)
@@ -13,30 +18,36 @@
 
 Your Climate Future is a front end web application designed for those interested in learning about the future habitability and effects of climate change on a region up to the year 2100.
 
-The application features a responsive front-end built with TypeScript and CSS.
+The application was built with TypeScript and CSS and utilizes the Geoapify API, the BioSIM API and QuickChart API for data realization.
 
 ## Features
 
-- **User Authentication**:
+- **Enter Location using GeoApify API**:
 
-  - Create an account or proceed as a guest.
-  - Guests have full access but their saved filter sets persist only for the session.
+  - Any location entered is identified, validated and formatted correctly before being passed to the BioSIM API, ie. Address by location or location by address.
 
-- **Redaction Filter Sets**:
+- **Climate Predictions with BioSIM API**:
 
-  - Create redaction filter sets by selecting types of information to redact (e.g., names, addresses, phone numbers, emails, social security numbers, credit card numbers).
-  - Label and manage multiple filter sets.
-  - Edit and delete existing filter sets.
+  - The BioSIM API is used to gather and analyze climate data, which is essential for understanding and forecasting the impacts of climate change.
+  - Displays the mean high temperature for the current year and the predicted mean high for the future year.
+  - Calculates the percent change between those two values.
+  - Displays the highest temperature of the current year and the predicted highest for the future year.
+  - Calculates the percent change between those two values.
+  - Displays the total precipitation for the current year and the predicted total for the future year.
+  - Calculates the percent change between those two values.
 
-- **Prompt Management**:
+    Note: default future year is 2100. This can be changed in editing mode.
 
-  - Type in a prompt, select a filter set, and view/edit the redacted text.
-  - Submit prompts to the ChatGPT API.
-  - View and interact with the AI-generated responses.
+- **Data Visualization with quickly.io API**:
+
+  - To visually represent the climate data, QuickChart API is utilized to generate graphic charts.
+  - The mean high temperatures for the current and future years are displayed as bar charts.
+  - The highest temperatures for the current and future years are displayed as bar charts.
+  - The total precipitation for the current and future years are displayed as a line charts.
 
 - **User Experience**:
   - Designed with a user-friendly interface for easy navigation and use.
-  - Efficiently manage data with JSON, storing account data in a database for logged-in users and guest data in session storage.
+  - Efficiently manages data with local storage using JSON
 
 ## Demo
 
@@ -44,29 +55,30 @@ The application features a responsive front-end built with TypeScript and CSS.
 
 ## Usage
 
-To use RedactedGPT, follow these steps:
+To use Your Climate Future, follow these steps:
 
 1. **Visit the Application**:
-   Go to [RedactedGPT](https://your-live-demo-link.com).
+   Go to [Your Climate Future](tevnicolas.github.io/your-climate-future/).
 
-2. **Authentication**:
+2. **Set Location**:
 
-   - Create an account or continue as a guest.
+   - Type in a Location, City, Address, etc. to set the region that will be analyzed. Click 'Submit'.
 
-3. **Create Redaction Filter Sets**:
+3. **View Results**:
 
-   - Select the types of information you want to redact (e.g., names, addresses).
-   - Label the filter set for future use.
+   - Data points and calculated percent change is displayed.
+   - A graphical representation also aides in telling the location's climate story.
 
-4. **Submit Prompts**:
+4. **Edit or Delete Results**:
 
-   - Type your text prompt.
-   - Select the appropriate filter set to redact sensitive information.
-   - View and edit the redacted text if necessary.
+   - Click 'Edit City/Year' to edit the entry.
+   - You can edit the location, or the future year data point (default is 2100).
+   - Click 'Save' to regenerate, or 'Revert' to discard changes, or 'Delete' to delete the entry.
 
-5. **AI Analysis**:
-   - Submit the redacted prompt to the ChatGPT API.
-   - Review the AI-generated response.
+5. **View all Entries**:
+
+   - Click 'Entries' in the header to view all of your previous entries.
+   - Click on individual entries to view the complete analysis.
 
 ## License
 
@@ -78,4 +90,4 @@ For any questions or feedback, please contact:
 
 Your Name - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
 
-Project Link: [https://github.com/tevnicolas/redacted-gpt](https://github.com/tevnicolas/redacted-gpt)
+Project Link: [https://github.com/tevnicolas/your-climate-future](https://github.com/tevnicolas/your-climate-future)
