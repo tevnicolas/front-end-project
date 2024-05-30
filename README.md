@@ -51,7 +51,7 @@ The application was built with TypeScript and CSS and utilizes the Geoapify API,
 
 ## Demo
 
-![Kapture 2024-05-19 at 14 50 49](https://github.com/tevnicolas/redacted-gpt/assets/155599138/b535c08c-3617-43f1-a3f5-b5ac215b9f07)
+![Kapture 2024-05-29 at 21 59 40](https://github.com/tevnicolas/your-climate-future/assets/155599138/97688bcc-4b71-4f71-b54a-533aeb849438)
 
 ## Usage
 
